@@ -21,17 +21,23 @@ cd projects
 
 ```bash
 cd projects
-./test.sh
-# or directly:
 ./gradlew jvmTest
+```
+
+## Publishing to Local Maven
+
+Required before building examples. Note: `--no-configuration-cache` is needed because
+the `maven-publish` plugin has known issues with Gradle's configuration cache.
+
+```bash
+cd projects
+./gradlew publishToMavenLocal --no-configuration-cache
 ```
 
 ## Building Examples
 
-First publish the library to local Maven, then build examples:
-
 ```bash
-cd projects && ./install.sh
+cd projects && ./gradlew publishToMavenLocal --no-configuration-cache
 cd ../examples && ./gradlew build
 ```
 
