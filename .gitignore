@@ -1,0 +1,33 @@
+# Gradle
+.gradle/
+build/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/gradle/wrapper/gradle-wrapper.jar
+
+# KSP / generated
+**/generated/
+
+# IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Signing keys — NEVER commit
+*.gpg
+*.asc
+secring.*
+
+# Local overrides
+local.properties
+gradle-local.properties
+
+# Project-specific build dirs
+/projects/.gradle/
+/examples/.gradle/
