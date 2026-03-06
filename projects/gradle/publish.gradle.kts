@@ -31,4 +31,4 @@ configure<PublishingExtension> {
     }
 }
 
-apply(from = file("signing.gradle.kts"))
+apply(from = rootProject.file("gradle/signing.gradle.kts"))

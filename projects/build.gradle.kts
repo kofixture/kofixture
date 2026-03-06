@@ -69,11 +69,9 @@ apiValidation {
 // ── NMCP (Maven Central Publishing) ──────────────────────────────────────────
 // TODO: Before first release, add GitHub Secrets:
 //   OSSRH_USERNAME, OSSRH_PASSWORD, SIGNING_KEY_ID, SIGNING_KEY, SIGNING_PASSWORD
-fun getRepoUsername(): String =
-    findProperty("OSSRH_USERNAME")?.toString() ?: System.getenv("OSSRH_USERNAME") ?: ""
+fun getRepoUsername(): String = findProperty("OSSRH_USERNAME")?.toString() ?: System.getenv("OSSRH_USERNAME") ?: ""
 
-fun getRepoPassword(): String =
-    findProperty("OSSRH_PASSWORD")?.toString() ?: System.getenv("OSSRH_PASSWORD") ?: ""
+fun getRepoPassword(): String = findProperty("OSSRH_PASSWORD")?.toString() ?: System.getenv("OSSRH_PASSWORD") ?: ""
 
 nmcpAggregation {
     centralPortal {
