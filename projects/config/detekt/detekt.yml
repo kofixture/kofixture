@@ -1,0 +1,27 @@
+# Detekt configuration for Kofixture
+# Extends detekt defaults — only explicit overrides are listed here.
+# Full default config reference: https://detekt.dev/docs/introduction/configurations
+
+build:
+  maxIssues: 0
+
+complexity:
+  TooManyFunctions:
+    # Registries and sealed hierarchies legitimately have many functions.
+    active: false
+  LongParameterList:
+    # Generated code and DSL builders may have many parameters.
+    active: false
+
+style:
+  MagicNumber:
+    # Relax magic number checks for common safe patterns.
+    ignorePropertyDeclaration: true
+    ignoreLocalVariableDeclaration: true
+    ignoreConstantDeclaration: true
+    ignoreCompanionObjectPropertyDeclaration: true
+    ignoreAnnotation: true
+    ignoreNamedArgument: true
+    ignoreEnums: true
+    ignoreRanges: true
+    ignoreExtensionFunctions: true
