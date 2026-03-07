@@ -28,6 +28,18 @@ secring.*
 local.properties
 gradle-local.properties
 
+# Kotlin daemon/compiler cache
+**/.kotlin/
+
+# Claude Code session data (plans, memory)
+.claude/
+
+# Claude AI context / planning files — not part of the repository
+claude.md
+first_task.md
+task-01-bootstrap-skeleton.md
+docs/plans/
+
 # Project-specific build dirs
 /projects/.gradle/
 /examples/.gradle/

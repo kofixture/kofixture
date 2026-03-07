@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/prepare-env
+
+      - name: Check formatting
+        working-directory: projects
+        run: ./gradlew spotlessCheck
+
+      - name: Static analysis
+        working-directory: projects
+        run: ./gradlew detekt
+
+      - name: Build
+        working-directory: projects
+        run: ./gradlew build
+
+      - name: JVM tests
+        working-directory: projects
+        run: ./gradlew jvmTest
+
+      - name: API compatibility check
+        working-directory: projects
+        run: ./gradlew apiCheck
+
+  test-native:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/prepare-env
+
+      - name: Native tests
+        working-directory: projects
+        run: ./gradlew :kofixture-core:macosArm64Test :kofixture-kotest-arb:macosArm64Test

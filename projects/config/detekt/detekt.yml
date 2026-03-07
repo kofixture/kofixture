@@ -5,23 +5,12 @@
 build:
   maxIssues: 0
 
-complexity:
-  TooManyFunctions:
-    # Registries and sealed hierarchies legitimately have many functions.
-    active: false
-  LongParameterList:
-    # Generated code and DSL builders may have many parameters.
-    active: false
-
 style:
+  MaxLineLength:
+    # Align with ktlint's default of 140 characters.
+    maxLineLength: 140
   MagicNumber:
-    # Relax magic number checks for common safe patterns.
-    ignorePropertyDeclaration: true
-    ignoreLocalVariableDeclaration: true
-    ignoreConstantDeclaration: true
-    ignoreCompanionObjectPropertyDeclaration: true
-    ignoreAnnotation: true
-    ignoreNamedArgument: true
-    ignoreEnums: true
+    # Disable for tests — magic numbers in test assertions are self-documenting.
+    # Generated code is excluded globally via the Detekt source config (build/generated/**).
+    excludes: ['**/*Test.kt', '**/test/**']
     ignoreRanges: true
-    ignoreExtensionFunctions: true
