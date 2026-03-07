@@ -15,7 +15,7 @@ val kofixture_version: String by project
 
 dependencies {
     testImplementation("io.github.kofixture:kofixture-core:$kofixture_version")
-    testImplementation("io.kotest:kotest-runner-junit5:6.0.0.M4")
+    testImplementation("io.kotest:kotest-runner-junit5:6.1.4")
 }
 
 tasks.test {
