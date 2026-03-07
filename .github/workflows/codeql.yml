@@ -26,9 +26,9 @@ jobs:
           languages: java-kotlin
           build-mode: manual
 
-      - name: Build
+      - name: Build (JVM only — CodeQL analyses JVM bytecode)
         working-directory: projects
-        run: ./gradlew build -x test
+        run: ./gradlew compileKotlinJvm
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
