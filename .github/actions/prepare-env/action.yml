@@ -12,7 +12,6 @@ runs:
       with:
         java-version: '21'
         distribution: zulu
-        cache: maven
 
     - name: Set up Gradle
       uses: gradle/actions/setup-gradle@v3

@@ -175,8 +175,7 @@ inline fun <reified T> FixtureRegistryBuilder.register(
     noinline factory: FactoryScope.() -> Generator<T>,
 ) = register(typeOf<T>(), tag, factory)
 
-fun buildRegistry(block: FixtureRegistryBuilder.() -> Unit): FixtureRegistry =
-    FixtureRegistryBuilder().apply(block).build()
+fun buildRegistry(block: FixtureRegistryBuilder.() -> Unit): FixtureRegistry = FixtureRegistryBuilder().apply(block).build()
 
 /**
  * Public helper for KSP-generated code.
