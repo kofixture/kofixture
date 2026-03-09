@@ -20,6 +20,7 @@ dependencies {
     testImplementation(libs.kctfork.core)
     testImplementation(libs.kctfork.ksp)
     testImplementation(libs.kotest.runner.junit5)
+    testImplementation(project(":kofixture-kotest-arb"))
 }
 
 tasks.withType<Test>().configureEach {
