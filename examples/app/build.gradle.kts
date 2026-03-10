@@ -19,7 +19,7 @@ dependencies {
     // @KoFixture annotation must be visible to the Kotlin compiler (kspTest alone is not enough)
     testCompileOnly("io.github.kofixture:kofixture-ksp:$kofixture_version")
     testImplementation("io.github.kofixture:kofixture-kotest:$kofixture_version")
-    testImplementation("io.kotest:kotest-runner-junit5:6.1.4")
+    testImplementation("io.kotest:kotest-runner-junit5:6.1.6")
 }
 
 tasks.test {
