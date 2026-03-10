@@ -9,7 +9,7 @@ object KofixtureContext {
     var defaultModules: List<FixtureModule> = emptyList()
 
     @PublishedApi
-    internal val registries: MutableMap<KofixtureTest, FixtureRegistry> = mutableMapOf()
+    internal val registries: MutableMap<KofixtureTest, FixtureRegistry> = concurrentMutableMapOf()
 
     fun registryFor(spec: KofixtureTest): FixtureRegistry = registries[spec] ?: error(
         "No fixture registry found for ${spec::class.simpleName}. " +
@@ -26,7 +26,7 @@ object KofixtureContext {
         registries[spec] = buildRegistry { modules.forEach { includes(it) } }
     }
 
-    internal fun releaseFor(spec: KofixtureTest) {
+    fun releaseFor(spec: KofixtureTest) {
         registries.remove(spec)
     }
 }

@@ -93,6 +93,7 @@ public final class co/kofixtures/core/KofixtureContext {
 	public final fun getDefaultModules ()Ljava/util/List;
 	public final fun getRegistries ()Ljava/util/Map;
 	public final fun registryFor (Lco/kofixtures/core/KofixtureTest;)Lco/kofixtures/core/FixtureRegistry;
+	public final fun releaseFor (Lco/kofixtures/core/KofixtureTest;)V
 	public final fun setDefaultModules (Ljava/util/List;)V
 }
 

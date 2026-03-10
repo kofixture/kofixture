@@ -1,8 +1,9 @@
-// Before building examples, publish the library to local Maven:
-//   cd ../projects && ./install.sh
+// The library modules are wired via composite build in settings.gradle.kts —
+// no publishToMavenLocal step needed.
 
 plugins {
     kotlin("jvm")
+    id("com.google.devtools.ksp")
 }
 
 java {
@@ -14,8 +15,11 @@ java {
 val kofixture_version: String by project
 
 dependencies {
-    testImplementation("io.github.kofixture:kofixture-core:$kofixture_version")
-    testImplementation("io.kotest:kotest-runner-junit5:6.0.0.M4")
+    kspTest("io.github.kofixture:kofixture-ksp:$kofixture_version")
+    // @KoFixture annotation must be visible to the Kotlin compiler (kspTest alone is not enough)
+    testCompileOnly("io.github.kofixture:kofixture-ksp:$kofixture_version")
+    testImplementation("io.github.kofixture:kofixture-kotest:$kofixture_version")
+    testImplementation("io.kotest:kotest-runner-junit5:6.1.4")
 }
 
 tasks.test {
