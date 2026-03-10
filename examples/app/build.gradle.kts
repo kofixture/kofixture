@@ -16,7 +16,7 @@ val kofixture_version: String by project
 
 dependencies {
     kspTest("io.github.kofixture:kofixture-ksp:$kofixture_version")
-    // @KoFixture annotation must be visible to the Kotlin compiler (kspTest alone is not enough)
+    // @Kofixture annotation must be visible to the Kotlin compiler (kspTest alone is not enough)
     testCompileOnly("io.github.kofixture:kofixture-ksp:$kofixture_version")
     testImplementation("io.github.kofixture:kofixture-kotest:$kofixture_version")
     testImplementation("io.kotest:kotest-runner-junit5:6.1.6")

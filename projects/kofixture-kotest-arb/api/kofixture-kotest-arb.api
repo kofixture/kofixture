@@ -1,11 +1,11 @@
-public final class co/kofixtures/kotest/arb/ArbGenerator : co/kofixtures/core/Generator {
+public final class io/kofixture/kotest/arb/ArbGenerator : io/kofixture/core/Generator {
 	public fun <init> (Lio/kotest/property/Arb;)V
 	public fun next (Lkotlin/random/Random;)Ljava/lang/Object;
 	public final fun unwrap ()Lio/kotest/property/Arb;
 }
 
-public final class co/kofixtures/kotest/arb/ArbGeneratorKt {
-	public static final fun asArb (Lco/kofixtures/core/Generator;)Lio/kotest/property/Arb;
-	public static final fun toGenerator (Lio/kotest/property/Arb;)Lco/kofixtures/core/Generator;
+public final class io/kofixture/kotest/arb/ArbGeneratorKt {
+	public static final fun asArb (Lio/kofixture/core/Generator;)Lio/kotest/property/Arb;
+	public static final fun toGenerator (Lio/kotest/property/Arb;)Lio/kofixture/core/Generator;
 }
 

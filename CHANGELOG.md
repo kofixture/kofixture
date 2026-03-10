@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `arb<T>()` property delegate alongside `sample<T>()` and `generator<T>()`
 
 - **`kofixture-ksp`** — KSP annotation processor (JVM only)
-  - `@KoFixture(packages, classes, moduleName)` annotation targeting `object` declarations
+  - `@Kofixture(packages, classes, moduleName)` annotation targeting `object` declarations
   - Generates a typed `FixtureModule` (`val xxxFixtures`) for all discovered classes
   - Supports data classes, enums, sealed classes/interfaces, and objects
   - Generates `OverrideScope<T>` extension properties and functions per class,
