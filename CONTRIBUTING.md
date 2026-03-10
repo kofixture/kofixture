@@ -24,21 +24,14 @@ cd projects
 ./gradlew jvmTest
 ```
 
-## Publishing to Local Maven
-
-Required before building examples. Note: `--no-configuration-cache` is needed because
-the `maven-publish` plugin has known issues with Gradle's configuration cache.
-
-```bash
-cd projects
-./gradlew publishToMavenLocal --no-configuration-cache
-```
-
 ## Building Examples
 
+The examples module uses a [composite build](https://docs.gradle.org/current/userguide/composite_builds.html)
+so no local publishing step is required — Gradle substitutes Maven coordinates with the local source projects automatically.
+
 ```bash
-cd projects && ./gradlew publishToMavenLocal --no-configuration-cache
-cd ../examples && ./gradlew build
+cd examples
+./gradlew build
 ```
 
 ## Code Conventions
