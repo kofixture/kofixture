@@ -3,6 +3,8 @@ import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
 
 plugins {
     kotlin("multiplatform")
+    id("org.jetbrains.dokka")
+    id("org.jetbrains.dokka-javadoc")
 }
 
 kotlin {

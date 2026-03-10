@@ -18,6 +18,7 @@ import io.kotest.core.spec.style.WordSpec
 // The logic is intentionally kept simple (2 lines each) to minimise maintenance risk.
 // Note: KofixtureAnnotationSpec lives in jvmMain — AnnotationSpec is JVM-only in Kotest.
 
+/** [BehaviorSpec] base class that integrates [KofixtureTest]. See [KofixtureFunSpec] for usage. */
 abstract class KofixtureBehaviorSpec(
     body: KofixtureBehaviorSpec.() -> Unit = {},
 ) : BehaviorSpec(), KofixtureTest {
@@ -36,6 +37,7 @@ abstract class KofixtureBehaviorSpec(
     }
 }
 
+/** [DescribeSpec] base class that integrates [KofixtureTest]. See [KofixtureFunSpec] for usage. */
 abstract class KofixtureDescribeSpec(
     body: KofixtureDescribeSpec.() -> Unit = {},
 ) : DescribeSpec(), KofixtureTest {
@@ -54,6 +56,7 @@ abstract class KofixtureDescribeSpec(
     }
 }
 
+/** [ExpectSpec] base class that integrates [KofixtureTest]. See [KofixtureFunSpec] for usage. */
 abstract class KofixtureExpectSpec(
     body: KofixtureExpectSpec.() -> Unit = {},
 ) : ExpectSpec(), KofixtureTest {
@@ -72,6 +75,7 @@ abstract class KofixtureExpectSpec(
     }
 }
 
+/** [FeatureSpec] base class that integrates [KofixtureTest]. See [KofixtureFunSpec] for usage. */
 abstract class KofixtureFeatureSpec(
     body: KofixtureFeatureSpec.() -> Unit = {},
 ) : FeatureSpec(), KofixtureTest {
@@ -90,6 +94,7 @@ abstract class KofixtureFeatureSpec(
     }
 }
 
+/** [FreeSpec] base class that integrates [KofixtureTest]. See [KofixtureFunSpec] for usage. */
 abstract class KofixtureFreeSpec(
     body: KofixtureFreeSpec.() -> Unit = {},
 ) : FreeSpec(), KofixtureTest {
@@ -108,6 +113,25 @@ abstract class KofixtureFreeSpec(
     }
 }
 
+/**
+ * [FunSpec] base class that integrates [KofixtureTest].
+ *
+ * The constructor lambda runs with `KofixtureFunSpec` as receiver, so
+ * [sample][co.kofixtures.core.KofixtureTest.sample],
+ * [generator][co.kofixtures.core.KofixtureTest.generator] delegates are available directly:
+ *
+ * ```kotlin
+ * class MyTest : KofixtureFunSpec({
+ *     val user by sample<User> { name = "Alice" }
+ *     test("name") { user.name shouldBe "Alice" }
+ * }) {
+ *     override val fixtureModules = listOf(myFixtures)
+ * }
+ * ```
+ *
+ * Registry lifecycle is managed automatically via [beforeSpec]/[afterSpec].
+ * If `KofixtureListener` is also installed globally, double-calling is harmless.
+ */
 abstract class KofixtureFunSpec(
     body: KofixtureFunSpec.() -> Unit = {},
 ) : FunSpec(), KofixtureTest {
@@ -126,6 +150,7 @@ abstract class KofixtureFunSpec(
     }
 }
 
+/** [ShouldSpec] base class that integrates [KofixtureTest]. See [KofixtureFunSpec] for usage. */
 abstract class KofixtureShouldSpec(
     body: KofixtureShouldSpec.() -> Unit = {},
 ) : ShouldSpec(), KofixtureTest {
@@ -144,6 +169,7 @@ abstract class KofixtureShouldSpec(
     }
 }
 
+/** [StringSpec] base class that integrates [KofixtureTest]. See [KofixtureFunSpec] for usage. */
 abstract class KofixtureStringSpec(
     body: KofixtureStringSpec.() -> Unit = {},
 ) : StringSpec(), KofixtureTest {
@@ -162,6 +188,7 @@ abstract class KofixtureStringSpec(
     }
 }
 
+/** [WordSpec] base class that integrates [KofixtureTest]. See [KofixtureFunSpec] for usage. */
 abstract class KofixtureWordSpec(
     body: KofixtureWordSpec.() -> Unit = {},
 ) : WordSpec(), KofixtureTest {
