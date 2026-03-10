@@ -8,6 +8,21 @@ import kotlin.reflect.KType
 import kotlin.reflect.KTypeProjection
 import kotlin.reflect.typeOf
 
+/**
+ * The runtime registry that resolves generators and produces fixture values.
+ *
+ * A registry is immutable after construction; use [FixtureRegistryBuilder] (via [buildRegistry])
+ * to assemble one. At runtime, [sample] and [generator] are the primary entry points.
+ *
+ * Resolution order for a requested type:
+ * 1. Type-based override supplied in the call-site [OverrideScope] block.
+ * 2. Tagged registration matching the requested tag.
+ * 3. Primary (untagged) registration.
+ * 4. Nullable derivation — if `T?` is requested and a generator for `T` exists, produces `T`
+ *    or `null` with 50 % probability.
+ * 5. Collection derivation — auto-derives generators for [List], [Set], and [Map].
+ * 6. Error — throws if none of the above apply.
+ */
 class FixtureRegistry internal constructor(
     internal val factories: Map<RegistryKey, FactoryScope.() -> Generator<*>>,
     val collectionConfig: CollectionConfig = CollectionConfig(),
@@ -20,6 +35,10 @@ class FixtureRegistry internal constructor(
                 Triple(key.type.classifier, key.type.arguments, key.tag) to key.type
             }
 
+    /**
+     * Returns the [Generator] for [T], optionally scoped to a [tag] and with per-call overrides
+     * applied via [block]. The generator is resolved fresh on every call but is not yet sampled.
+     */
     inline fun <reified T> generator(
         tag: String? = null,
         noinline block: OverrideScope<T>.() -> Unit = {},
@@ -29,6 +48,15 @@ class FixtureRegistry internal constructor(
         return resolve(typeOf<T>(), tag, active)
     }
 
+    /**
+     * Resolves the generator for [T] and immediately draws one sample from it.
+     *
+     * The optional [block] configures per-call overrides via [OverrideScope]; these take
+     * precedence over registered generators but do not mutate the registry.
+     *
+     * @param random the source of randomness; defaults to [Random.Default].
+     * @param tag selects a tagged registration when multiple generators are registered for [T].
+     */
     inline fun <reified T> sample(
         random: Random = Random.Default,
         tag: String? = null,
@@ -142,6 +170,13 @@ class FixtureRegistry internal constructor(
     }
 }
 
+/**
+ * Mutable builder used inside [buildRegistry] to accumulate generator registrations.
+ *
+ * Call [register] to add individual generators, [includes] to pull in a [FixtureModule], and
+ * [collections] to configure size ranges for auto-derived collection types. The builder is
+ * discarded after [build] is called.
+ */
 class FixtureRegistryBuilder {
     @PublishedApi
     internal val factories = mutableMapOf<RegistryKey, FactoryScope.() -> Generator<*>>()
@@ -152,10 +187,21 @@ class FixtureRegistryBuilder {
         collectionConfig = CollectionConfigBuilder().apply(block).build()
     }
 
+    /**
+     * Merges all registrations from each [FixtureModule] into this builder.
+     * Modules are applied in order; later registrations overwrite earlier ones for the same type.
+     */
     fun includes(vararg modules: FixtureModule) {
         modules.forEach { it.block(this) }
     }
 
+    /**
+     * Registers a [Generator] factory for the given [KType] and optional [tag].
+     *
+     * The [factory] lambda receives a [FactoryScope] so it can obtain dependent generators from
+     * the same registry. Use the inline [register] overload (which infers [T] automatically) in
+     * most situations.
+     */
     fun <T> register(
         type: KType,
         tag: String? = null,
@@ -168,6 +214,13 @@ class FixtureRegistryBuilder {
     fun build(): FixtureRegistry = FixtureRegistry(factories.toMap(), collectionConfig)
 }
 
+/**
+ * Registers a [Generator] for reified type [T] with an optional [tag].
+ *
+ * This overload infers the [KType] from the reified type parameter and should be preferred over
+ * the `KType`-based overload in hand-written code. Use [tag] to register multiple generators for
+ * the same type and select among them at the call site.
+ */
 @OptIn(ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
 inline fun <reified T> FixtureRegistryBuilder.register(
@@ -175,6 +228,18 @@ inline fun <reified T> FixtureRegistryBuilder.register(
     noinline factory: FactoryScope.() -> Generator<T>,
 ) = register(typeOf<T>(), tag, factory)
 
+/**
+ * DSL entry point that builds an immutable [FixtureRegistry] from a [FixtureRegistryBuilder].
+ *
+ * Typically called inside a test spec's `beforeSpec` hook or via [KofixtureContext]:
+ *
+ * ```kotlin
+ * val registry = buildRegistry {
+ *     includes(userModule)
+ *     register<UUID> { Generator { _ -> UUID.randomUUID() } }
+ * }
+ * ```
+ */
 fun buildRegistry(block: FixtureRegistryBuilder.() -> Unit): FixtureRegistry = FixtureRegistryBuilder().apply(block).build()
 
 /**

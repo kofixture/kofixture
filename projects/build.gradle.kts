@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.ksp).apply(false)
     alias(libs.plugins.spotless)
     alias(libs.plugins.detekt)
-    alias(libs.plugins.dokka).apply(false)
+    // dokka is on the buildSrc classpath and applied per-project in the allprojects block below
     alias(libs.plugins.kotlinBinary)
     alias(libs.plugins.nmcp)
 }
@@ -59,6 +59,7 @@ allprojects {
     version = findProperty("kofixture.version") as String
 
     apply(plugin = "org.jetbrains.dokka")
+    apply(plugin = "org.jetbrains.dokka-javadoc")
 }
 
 // ── Binary Compatibility Validator ────────────────────────────────────────────

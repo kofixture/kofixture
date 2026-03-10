@@ -24,13 +24,36 @@ import kotlin.reflect.typeOf
  * ```
  */
 interface KofixtureTest {
+    /**
+     * Fixture modules this test spec uses to build its registry.
+     *
+     * When the list is empty, [KofixtureContext.defaultModules] is used instead. Override this
+     * property in a spec subclass to supply modules without a constructor parameter.
+     */
     val fixtureModules: List<FixtureModule> get() = emptyList()
 
+    /**
+     * Returns the [FixtureRegistry] that was built for this spec during `beforeSpec`.
+     *
+     * Throws if [buildRegistry] has not been called yet.
+     */
     fun registry(): FixtureRegistry = KofixtureContext.registryFor(this)
 
+    /**
+     * Initialises the registry for this spec by applying [fixtureModules] (or
+     * [KofixtureContext.defaultModules] if empty). Called automatically by spec base classes
+     * and `KofixtureListener` in `beforeSpec`; invoke manually only when inheriting
+     * [KofixtureTest] directly without a provided base class.
+     */
     fun buildRegistry() = KofixtureContext.buildFor(this)
 }
 
+/**
+ * Delegate that resolves a new [T] sample on every property access.
+ *
+ * The [block] applies per-access overrides; it runs inside an [OverrideScope] so KSP-generated
+ * extension properties (e.g. `name = "Alice"`) are available when KSP is used.
+ */
 inline fun <reified T> KofixtureTest.sample(
     tag: String? = null,
     random: Random = Random,
@@ -42,6 +65,12 @@ inline fun <reified T> KofixtureTest.sample(
     }
 }
 
+/**
+ * Delegate that resolves the [Generator] for [T] on every property access.
+ *
+ * Useful when the generator itself (rather than a single value) is needed, for example to draw
+ * multiple independent samples or to pass to a property-based testing framework.
+ */
 inline fun <reified T> KofixtureTest.generator(
     tag: String? = null,
     noinline block: OverrideScope<T>.() -> Unit = {},
