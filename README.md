@@ -21,7 +21,7 @@ arbitrarily complex object graphs — including nested types, enums, sealed hier
 
 ```kotlin
 // src/test/kotlin/com/example/Fixtures.kt
-@KoFixture(packages = ["com.example"])
+@Kofixture(packages = ["com.example"])
 object Fixtures
 ```
 
