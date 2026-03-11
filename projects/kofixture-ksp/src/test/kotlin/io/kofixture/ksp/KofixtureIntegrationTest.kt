@@ -24,7 +24,7 @@ class KofixtureIntegrationTest : FunSpec({
                     import io.kofixture.core.Generator
                     import io.kofixture.core.buildRegistry
                     import io.kofixture.core.register
-                    import io.kofixture.ksp.Kofixture
+                    import io.kofixture.core.Kofixture
 
                     data class Project(val name: String, val description: String)
 
@@ -57,7 +57,7 @@ class KofixtureIntegrationTest : FunSpec({
                     import io.kofixture.core.Generator
                     import io.kofixture.core.buildRegistry
                     import io.kofixture.core.register
-                    import io.kofixture.ksp.Kofixture
+                    import io.kofixture.core.Kofixture
 
                     data class Person(val name: String, val age: Int)
 
@@ -95,7 +95,7 @@ class KofixtureIntegrationTest : FunSpec({
                     import io.kofixture.core.Generator
                     import io.kofixture.core.buildRegistry
                     import io.kofixture.core.register
-                    import io.kofixture.ksp.Kofixture
+                    import io.kofixture.core.Kofixture
 
                     data class Address(val street: String, val city: String)
                     data class User(val name: String, val address: Address)
@@ -132,7 +132,7 @@ class KofixtureIntegrationTest : FunSpec({
                     """
                     package co.example.domain
                     import io.kofixture.core.buildRegistry
-                    import io.kofixture.ksp.Kofixture
+                    import io.kofixture.core.Kofixture
 
                     sealed class Status { object Active : Status(); object Inactive : Status() }
 
@@ -162,7 +162,7 @@ class KofixtureIntegrationTest : FunSpec({
                     """
                     package co.example.domain
                     import io.kofixture.core.buildRegistry
-                    import io.kofixture.ksp.Kofixture
+                    import io.kofixture.core.Kofixture
 
                     enum class Priority { LOW, MEDIUM, HIGH }
 

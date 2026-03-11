@@ -5,6 +5,7 @@ plugins {
 java {
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
+    withSourcesJar()
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile>().configureEach {
@@ -28,3 +29,11 @@ tasks.withType<Test>().configureEach {
 }
 
 apply(from = file("../gradle/publish.gradle.kts"))
+
+configure<PublishingExtension> {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+        }
+    }
+}

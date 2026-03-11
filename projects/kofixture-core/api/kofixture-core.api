@@ -88,6 +88,12 @@ public abstract interface class io/kofixture/core/Generator {
 	public abstract fun next (Lkotlin/random/Random;)Ljava/lang/Object;
 }
 
+public abstract interface annotation class io/kofixture/core/Kofixture : java/lang/annotation/Annotation {
+	public abstract fun classes ()[Ljava/lang/Class;
+	public abstract fun moduleName ()Ljava/lang/String;
+	public abstract fun packages ()[Ljava/lang/String;
+}
+
 public final class io/kofixture/core/KofixtureContext {
 	public static final field INSTANCE Lio/kofixture/core/KofixtureContext;
 	public final fun getDefaultModules ()Ljava/util/List;
