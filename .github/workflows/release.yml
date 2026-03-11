@@ -1,11 +1,5 @@
 name: Release
 
-# TODO: This workflow is DISABLED until secrets are configured.
-# Before enabling:
-# 1. Add GitHub Secrets: OSSRH_USERNAME, OSSRH_PASSWORD
-# 2. Add GitHub Secrets: SIGNING_KEY_ID, SIGNING_KEY, SIGNING_PASSWORD
-# 3. Remove the "if: false" condition from the publish job
-
 on:
   push:
     tags:
@@ -13,7 +7,6 @@ on:
 
 jobs:
   publish:
-    if: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6

@@ -16,7 +16,7 @@ configure<PublishingExtension> {
         pom {
             name.set("Kofixture")
             description.set("Kotlin Multiplatform test fixture generation library")
-            url.set("https://github.com/kofixture/kofixture") // TODO: update to real URL
+            url.set("https://github.com/kofixture/kofixture")
 
             licenses {
                 license {
@@ -26,14 +26,19 @@ configure<PublishingExtension> {
             }
 
             scm {
-                url.set("https://github.com/kofixture/kofixture") // TODO: update to real URL
                 connection.set("scm:git:https://github.com/kofixture/kofixture.git")
+                developerConnection.set("scm:git:ssh://git@github.com/kofixture/kofixture.git")
+                url.set("https://github.com/kofixture/kofixture")
             }
 
             developers {
                 developer {
-                    // TODO: add real developer name and contact
                     name.set("Kofixture Contributors")
+                    id.set("arkadiusz")
+                    name.set("Arkadiusz Szast")
+                    email.set("szast.arkadiusz@pm.me")
+                    organization.set("Kofixture")
+                    organizationUrl.set("https://github.com/kofixture")
                 }
             }
         }
