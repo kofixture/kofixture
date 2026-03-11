@@ -23,7 +23,7 @@ class KofixtureProcessorTest : FunSpec({
                 "Domain.kt",
                 """
                 package co.example.domain
-                import io.kofixture.ksp.Kofixture
+                import io.kofixture.core.Kofixture
 
                 @Kofixture(packages = ["co.example.domain"])
                 object DomainFixtures
@@ -41,7 +41,7 @@ class KofixtureProcessorTest : FunSpec({
                 "Domain.kt",
                 """
                 package co.example.domain
-                import io.kofixture.ksp.Kofixture
+                import io.kofixture.core.Kofixture
                 data class Project(val name: String, val description: String)
                 @Kofixture(packages = ["co.example.domain"])
                 object DomainFixtures
@@ -62,7 +62,7 @@ class KofixtureProcessorTest : FunSpec({
                 "Domain.kt",
                 """
                 package co.example.domain
-                import io.kofixture.ksp.Kofixture
+                import io.kofixture.core.Kofixture
                 enum class Priority { LOW, MEDIUM, HIGH }
                 @Kofixture(packages = ["co.example.domain"])
                 object DomainFixtures
@@ -82,7 +82,7 @@ class KofixtureProcessorTest : FunSpec({
                 "Domain.kt",
                 """
                 package co.example.domain
-                import io.kofixture.ksp.Kofixture
+                import io.kofixture.core.Kofixture
                 object Singleton
                 @Kofixture(packages = ["co.example.domain"])
                 object DomainFixtures
@@ -101,7 +101,7 @@ class KofixtureProcessorTest : FunSpec({
                 "Domain.kt",
                 """
                 package co.example.domain
-                import io.kofixture.ksp.Kofixture
+                import io.kofixture.core.Kofixture
                 sealed class Status {
                     object Active : Status()
                     object Inactive : Status()
@@ -128,7 +128,7 @@ class KofixtureProcessorTest : FunSpec({
                 "Domain.kt",
                 """
                 package co.example.domain
-                import io.kofixture.ksp.Kofixture
+                import io.kofixture.core.Kofixture
 
                 object Singleton
                 enum class Color { RED, GREEN }
@@ -162,7 +162,7 @@ class KofixtureProcessorTest : FunSpec({
                 "Domain.kt",
                 """
                 package co.example.domain
-                import io.kofixture.ksp.Kofixture
+                import io.kofixture.core.Kofixture
                 data class Person(val name: String, val age: Int)
                 @Kofixture(packages = ["co.example.domain"])
                 object DomainFixtures
@@ -188,7 +188,7 @@ class KofixtureProcessorTest : FunSpec({
                 "Domain.kt",
                 """
                 package co.example.domain
-                import io.kofixture.ksp.Kofixture
+                import io.kofixture.core.Kofixture
                 data class Address(val street: String, val city: String)
                 data class User(val name: String, val address: Address)
                 @Kofixture(packages = ["co.example.domain"])
@@ -210,7 +210,7 @@ class KofixtureProcessorTest : FunSpec({
                 "Domain.kt",
                 """
                 package co.example.domain
-                import io.kofixture.ksp.Kofixture
+                import io.kofixture.core.Kofixture
                 data class Person(val name: String, val age: Int)
                 @Kofixture(packages = ["co.example.domain"])
                 object DomainFixtures
@@ -234,7 +234,7 @@ class KofixtureProcessorTest : FunSpec({
                 "Domain.kt",
                 """
                 package co.example.domain
-                import io.kofixture.ksp.Kofixture
+                import io.kofixture.core.Kofixture
                 data class Person(val name: String?, val age: Int)
                 @Kofixture(packages = ["co.example.domain"])
                 object DomainFixtures
@@ -256,7 +256,7 @@ class KofixtureProcessorTest : FunSpec({
                 import io.kofixture.core.Generator
                 import io.kofixture.core.buildRegistry
                 import io.kofixture.core.register
-                import io.kofixture.ksp.Kofixture
+                import io.kofixture.core.Kofixture
 
                 data class Person(val name: String, val age: Int)
 

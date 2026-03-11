@@ -1,13 +1,13 @@
-package io.kofixture.ksp
+package io.kofixture.core
 
 import kotlin.reflect.KClass
 
 /**
- * Marks an `object` declaration as the source of a KSP-generated [io.kofixture.core.FixtureModule].
+ * Marks an `object` declaration as the source of a KSP-generated [FixtureModule].
  *
  * The processor scans [packages] and explicit [classes] to collect eligible types — `data class`,
  * `enum class`, `sealed class`, `sealed interface`, and `object` — and emits a `FixtureModule`
- * property plus typed [io.kofixture.core.OverrideScope] extension members for each type found.
+ * property plus typed [OverrideScope] extension members for each type found.
  *
  * Example:
  * ```kotlin
@@ -16,7 +16,7 @@ import kotlin.reflect.KClass
  * // Generates: val fixtures: FixtureModule = ...
  * ```
  *
- * @see io.kofixture.core.FixtureModule
+ * @see FixtureModule
  */
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.SOURCE)

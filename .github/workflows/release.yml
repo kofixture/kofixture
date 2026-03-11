@@ -6,7 +6,31 @@ on:
       - 'v*'
 
 jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: ./.github/actions/prepare-env
+
+      - name: Check formatting
+        working-directory: projects
+        run: ./gradlew spotlessCheck
+
+      - name: Static analysis
+        working-directory: projects
+        run: ./gradlew detekt
+
+      - name: Build and test
+        working-directory: projects
+        run: ./gradlew build jvmTest
+
+      - name: API compatibility check
+        working-directory: projects
+        run: ./gradlew apiCheck
+
   publish:
+    needs: verify
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6

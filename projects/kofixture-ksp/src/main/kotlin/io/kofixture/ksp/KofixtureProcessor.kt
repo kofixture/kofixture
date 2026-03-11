@@ -14,7 +14,7 @@ import com.google.devtools.ksp.validate
 import io.kofixture.ksp.generator.FixtureModuleGenerator
 import io.kofixture.ksp.generator.OverrideScopeGenerator
 
-private const val ANNOTATION_FQN = "io.kofixture.ksp.Kofixture"
+private const val ANNOTATION_FQN = "io.kofixture.core.Kofixture"
 
 class KofixtureProcessor(
     private val codeGenerator: CodeGenerator,

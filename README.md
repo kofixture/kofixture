@@ -70,7 +70,6 @@ testImplementation("io.github.kofixture:kofixture-kotest:0.1.0")
 
 // + KSP processor (auto-generates fixture modules from annotated objects)
 kspTest("io.github.kofixture:kofixture-ksp:0.1.0")
-testCompileOnly("io.github.kofixture:kofixture-ksp:0.1.0") // annotation visibility
 ```
 
 ```kotlin
