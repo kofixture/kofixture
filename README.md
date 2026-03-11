@@ -62,14 +62,14 @@ val named: User = registry.sample { name = "Alice" }
 
 ```kotlin
 // build.gradle.kts
-testImplementation("io.github.kofixture:kofixture-core:0.1.0")
+testImplementation("io.github.kofixture:kofixture-core:0.1.1")
 
 // + Kotest integration (pick one or both)
-testImplementation("io.github.kofixture:kofixture-kotest-arb:0.1.0")
-testImplementation("io.github.kofixture:kofixture-kotest:0.1.0")
+testImplementation("io.github.kofixture:kofixture-kotest-arb:0.1.1")
+testImplementation("io.github.kofixture:kofixture-kotest:0.1.1")
 
 // + KSP processor (auto-generates fixture modules from annotated objects)
-kspTest("io.github.kofixture:kofixture-ksp:0.1.0")
+kspTest("io.github.kofixture:kofixture-ksp:0.1.1")
 ```
 
 ```kotlin
