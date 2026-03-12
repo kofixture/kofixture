@@ -16,7 +16,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile>().configureEa
 
 dependencies {
     compileOnly(libs.ksp.api)
-    implementation(project(":kofixture-core"))
+    compileOnly(project(":kofixture-core"))
 
     testImplementation(libs.kctfork.core)
     testImplementation(libs.kctfork.ksp)

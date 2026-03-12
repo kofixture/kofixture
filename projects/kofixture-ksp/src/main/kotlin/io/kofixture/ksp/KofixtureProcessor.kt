@@ -70,10 +70,20 @@ class KofixtureProcessor(
             )?.takeIf { it.isNotBlank() }
                 ?: objectDecl.simpleName.asString().replaceFirstChar { it.lowercase() }
 
+        val excludedFqns =
+            (
+                annotation.arguments
+                    .firstOrNull { it.name?.asString() == "excludedClasses" }
+                    ?.value as? List<*>
+            )?.filterIsInstance<KSType>()
+                ?.mapNotNull { it.declaration.qualifiedName?.asString() }
+                ?.toSet() ?: emptySet()
+
         val classes =
             ClassCollector(resolver)
                 .collect(packages, explicitClasses)
                 .filter { it.qualifiedName?.asString() != objectDecl.qualifiedName?.asString() }
+                .filter { it.qualifiedName?.asString() !in excludedFqns }
 
         val hasArb =
             resolver.getClassDeclarationByName(
@@ -117,7 +127,7 @@ class KofixtureProcessor(
             writer.write("import io.kofixture.core.Generator\n")
             writer.write("import io.kofixture.core.fixtureModule\n")
             writer.write("import io.kofixture.core.register\n")
-            if (hasSealed) {
+            if (hasSealed || classesWithParams.isNotEmpty()) {
                 writer.write("import io.kofixture.core.generatorFor\n")
             }
             if (hasSealed || classesWithParams.isNotEmpty()) {
@@ -125,9 +135,13 @@ class KofixtureProcessor(
             }
             if (classesWithParams.isNotEmpty()) {
                 writer.write("import io.kofixture.core.OverrideScope\n")
+                writer.write("import io.kofixture.core.ActiveOverrides\n")
                 writer.write("import io.kofixture.core.FixtureOverride\n")
                 writer.write("import io.kofixture.core.NamedOverrideKey\n")
-                writer.write("import kotlin.random.Random\n")
+                writer.write("import io.kofixture.core.PropOverrideScope\n")
+                writer.write("import kotlin.experimental.ExperimentalTypeInference\n")
+                writer.write("import kotlin.jvm.JvmName\n")
+                writer.write("import kotlin.reflect.KType\n")
             }
             if (classesWithParams.isNotEmpty() && hasArb) {
                 writer.write("import io.kotest.property.Arb\n")

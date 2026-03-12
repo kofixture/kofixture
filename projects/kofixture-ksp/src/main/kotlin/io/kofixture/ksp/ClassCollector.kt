@@ -49,7 +49,8 @@ internal class ClassCollector(private val resolver: Resolver) {
                 // sealed class: ClassKind.CLASS + Modifier.SEALED
                 // abstract class: ClassKind.CLASS + Modifier.ABSTRACT
                 // data class / regular class: ClassKind.CLASS, neither sealed nor abstract (sealed is still allowed here)
-                Modifier.ABSTRACT !in decl.modifiers
+                Modifier.ABSTRACT !in decl.modifiers &&
+                    decl.primaryConstructor?.modifiers?.contains(Modifier.PRIVATE) != true
             }
 
             ClassKind.INTERFACE -> {

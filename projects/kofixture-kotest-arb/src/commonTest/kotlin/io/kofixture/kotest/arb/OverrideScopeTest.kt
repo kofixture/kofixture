@@ -2,7 +2,6 @@ package io.kofixture.kotest.arb
 
 import io.kofixture.core.Generator
 import io.kofixture.core.buildRegistry
-import io.kofixture.core.register
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.property.arbitrary.arbitrary

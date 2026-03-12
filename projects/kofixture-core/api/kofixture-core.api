@@ -90,6 +90,7 @@ public abstract interface class io/kofixture/core/Generator {
 
 public abstract interface annotation class io/kofixture/core/Kofixture : java/lang/annotation/Annotation {
 	public abstract fun classes ()[Ljava/lang/Class;
+	public abstract fun excludedClasses ()[Ljava/lang/Class;
 	public abstract fun moduleName ()Ljava/lang/String;
 	public abstract fun packages ()[Ljava/lang/String;
 }

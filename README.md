@@ -34,6 +34,7 @@ class UserTest : KofixtureFunSpec({
     val user by sample<User> { name = "Alice" }
     val profile by sample<Profile> {
         user { name = "Bob" }
+        user { name { arbitrary { "Bob" } } }
         address { city = "Warsaw" }
     }
 
@@ -44,6 +45,7 @@ class UserTest : KofixtureFunSpec({
 }
 ```
 
+Nested overrides support const values plus Generator/Arb lambdas on child fields.
 Delegates (`sample<T>`, `generator<T>`, `arb<T>`) are resolved fresh per test via property delegation.
 
 ### Without KSP (manual registry)
@@ -62,14 +64,14 @@ val named: User = registry.sample { name = "Alice" }
 
 ```kotlin
 // build.gradle.kts
-testImplementation("io.github.kofixture:kofixture-core:0.1.1")
+testImplementation("io.github.kofixture:kofixture-core:0.1.2")
 
 // + Kotest integration (pick one or both)
-testImplementation("io.github.kofixture:kofixture-kotest-arb:0.1.1")
-testImplementation("io.github.kofixture:kofixture-kotest:0.1.1")
+testImplementation("io.github.kofixture:kofixture-kotest-arb:0.1.2")
+testImplementation("io.github.kofixture:kofixture-kotest:0.1.2")
 
 // + KSP processor (auto-generates fixture modules from annotated objects)
-kspTest("io.github.kofixture:kofixture-ksp:0.1.1")
+kspTest("io.github.kofixture:kofixture-ksp:0.1.2")
 ```
 
 ```kotlin
