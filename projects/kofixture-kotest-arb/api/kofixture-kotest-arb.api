@@ -9,7 +9,3 @@ public final class io/kofixture/kotest/arb/ArbGeneratorKt {
 	public static final fun toGenerator (Lio/kotest/property/Arb;)Lio/kofixture/core/Generator;
 }
 
-public abstract interface class io/kofixture/kotest/arb/ArbProducer {
-	public abstract fun produce ()Lio/kotest/property/Arb;
-}
-
