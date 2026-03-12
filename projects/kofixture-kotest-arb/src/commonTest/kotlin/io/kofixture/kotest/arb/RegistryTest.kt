@@ -51,6 +51,16 @@ class RegistryTest : FreeSpec({
             registry.generator<String>().next(rng) shouldBe "arb-string"
             registry.generator<Int>().next(rng) shouldBe 99
         }
+
+        "register with Generator and Arb in same block compiles without ambiguity" {
+            val registry =
+                buildRegistry {
+                    register<Int> { Generator { _ -> 42 } }
+                    register<String> { Arb.string(3..3) }
+                }
+            registry.generator<Int>().next(rng) shouldBe 42
+            registry.generator<String>().next(rng).shouldHaveLength(3)
+        }
     }
 
     "FixtureRegistryBuilder.registerArb()" - {

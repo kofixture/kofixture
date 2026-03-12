@@ -37,4 +37,9 @@ annotation class Kofixture(
      * name converted to lowercase (e.g., `object Fixtures` → `val fixtures`).
      */
     val moduleName: String = "",
+    /**
+     * Types to exclude from generation. Use this to prevent specific classes from being
+     * included even if they are found during package scanning.
+     */
+    val excludedClasses: Array<KClass<*>> = [],
 )

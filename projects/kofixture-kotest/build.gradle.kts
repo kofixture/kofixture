@@ -6,6 +6,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(project(":kofixture-core"))
+            api(project(":kofixture-kotest-arb"))
             api(libs.kotest.framework.engine)
         }
         commonTest.dependencies {

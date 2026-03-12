@@ -3,7 +3,6 @@ package io.kofixture.kotest.arb
 import io.kofixture.core.Generator
 import io.kofixture.core.KofixtureTest
 import io.kofixture.core.fixtureModule
-import io.kofixture.core.register
 import io.kotest.core.spec.Spec
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe

@@ -23,9 +23,9 @@ import kotlin.reflect.typeOf
  * The [block] runs once at registration time to produce the [Arb], which is then
  * wrapped in an [ArbGenerator] and used for every subsequent sample in this scope.
  */
-@JvmName("override_type_arb")
 @OptIn(ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
+@JvmName("override_type_arb")
 inline fun <reified T> OverrideScope<*>.override(block: TypeOverrideScope<T>.() -> Arb<T>) {
     addOverride(
         FixtureOverride.TypeBased(
@@ -40,9 +40,9 @@ inline fun <reified T> OverrideScope<*>.override(block: TypeOverrideScope<T>.() 
  *
  * Only the named property is affected; other properties of the same type are unaffected.
  */
-@JvmName("override_property_arb")
 @OptIn(ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
+@JvmName("override_property_arb")
 inline fun <reified Owner : Any, reified Prop> OverrideScope<*>.override(
     property: KProperty1<Owner, Prop>,
     block: PropOverrideScope<Prop>.() -> Arb<Prop>,
@@ -56,16 +56,13 @@ inline fun <reified Owner : Any, reified Prop> OverrideScope<*>.override(
 }
 
 // ---------------------------------------------------------------------------
-// Re-exported value/Generator overloads from io.kofixture.core so that all
-// six overloads share the same package scope in io.kofixture.kotest.arb.
-// This ensures @OverloadResolutionByLambdaReturnType disambiguation works
-// correctly when the call site is also in io.kofixture.kotest.arb.
+// Generator/value override extensions kept internal to avoid external ambiguity.
 // ---------------------------------------------------------------------------
 
-@JvmName("override_type_value")
 @OptIn(ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
-inline fun <reified T> OverrideScope<*>.override(crossinline block: TypeOverrideScope<T>.() -> T) {
+@JvmName("override_type_value")
+internal inline fun <reified T> OverrideScope<*>.override(crossinline block: TypeOverrideScope<T>.() -> T) {
     addOverride(
         FixtureOverride.TypeBased(
             typeOf<T>(),
@@ -74,10 +71,10 @@ inline fun <reified T> OverrideScope<*>.override(crossinline block: TypeOverride
     )
 }
 
-@JvmName("override_type_generator")
 @OptIn(ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
-inline fun <reified T> OverrideScope<*>.override(block: TypeOverrideScope<T>.() -> Generator<T>) {
+@JvmName("override_type_generator")
+internal inline fun <reified T> OverrideScope<*>.override(block: TypeOverrideScope<T>.() -> Generator<T>) {
     addOverride(
         FixtureOverride.TypeBased(
             typeOf<T>(),
@@ -86,10 +83,10 @@ inline fun <reified T> OverrideScope<*>.override(block: TypeOverrideScope<T>.() 
     )
 }
 
-@JvmName("override_property_value")
 @OptIn(ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
-inline fun <reified Owner : Any, reified Prop> OverrideScope<*>.override(
+@JvmName("override_property_value")
+internal inline fun <reified Owner : Any, reified Prop> OverrideScope<*>.override(
     property: KProperty1<Owner, Prop>,
     crossinline block: PropOverrideScope<Prop>.() -> Prop,
 ) {
@@ -101,10 +98,10 @@ inline fun <reified Owner : Any, reified Prop> OverrideScope<*>.override(
     )
 }
 
-@JvmName("override_property_generator")
 @OptIn(ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
-inline fun <reified Owner : Any, reified Prop> OverrideScope<*>.override(
+@JvmName("override_property_generator")
+internal inline fun <reified Owner : Any, reified Prop> OverrideScope<*>.override(
     property: KProperty1<Owner, Prop>,
     block: PropOverrideScope<Prop>.() -> Generator<Prop>,
 ) {

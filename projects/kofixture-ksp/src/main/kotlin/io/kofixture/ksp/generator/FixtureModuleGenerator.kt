@@ -136,7 +136,7 @@ internal class FixtureModuleGenerator(private val logger: KSPLogger) {
         val decl = type.declaration
         val fqn = decl.qualifiedName?.asString() ?: return decl.simpleName.asString()
         val pkg = fqn.substringBeforeLast('.', missingDelimiterValue = "")
-        val name = if (pkg.startsWith("kotlin") || pkg.startsWith("java")) decl.simpleName.asString() else fqn
+        val name = if (pkg.startsWith("kotlin")) decl.simpleName.asString() else fqn
         val nullable = if (type.isMarkedNullable) "?" else ""
         val args = type.arguments
         return if (args.isEmpty()) {

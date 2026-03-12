@@ -1,5 +1,7 @@
 @file:OptIn(org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi::class)
 
+@file:Suppress("MaxLineLength")
+
 package io.kofixture.ksp
 
 import com.google.devtools.ksp.processing.SymbolProcessorProvider
@@ -156,7 +158,7 @@ class KofixtureProcessorTest : FunSpec({
         content shouldNotContain "register<co.example.domain.Circle>"
     }
 
-    test("generates OverrideScope value setter and lambda overload for each param") {
+    test("generates OverrideScope value setter and generator lambda overload for each param") {
         val source =
             SourceFile.kotlin(
                 "Domain.kt",
@@ -175,14 +177,16 @@ class KofixtureProcessorTest : FunSpec({
         content shouldContain "var OverrideScope<co.example.domain.Person>.name: String?"
         content shouldContain "var OverrideScope<co.example.domain.Person>.age: Int?"
         // Lambda overloads
-        content shouldContain "fun OverrideScope<co.example.domain.Person>.name(block: (Random) -> String)"
-        content shouldContain "fun OverrideScope<co.example.domain.Person>.age(block: (Random) -> Int)"
+        content shouldContain
+            "fun OverrideScope<co.example.domain.Person>.name(block: OverrideScope<co.example.domain.Person>.() -> Generator<String>)"
+        content shouldContain
+            "fun OverrideScope<co.example.domain.Person>.age(block: OverrideScope<co.example.domain.Person>.() -> Generator<Int>)"
         // NamedOverrideKey
         content shouldContain "NamedOverrideKey(typeOf<co.example.domain.Person>(), \"name\")"
         content shouldContain "NamedOverrideKey(typeOf<co.example.domain.Person>(), \"age\")"
     }
 
-    test("generates nested scope overload for complex-type params") {
+    test("generates complex-type override overload for complex-type params") {
         val source =
             SourceFile.kotlin(
                 "Domain.kt",
@@ -198,9 +202,46 @@ class KofixtureProcessorTest : FunSpec({
         val result = compile(source)
         result.exitCode shouldBe KotlinCompilation.ExitCode.OK
         val content = result.generatedContent("DomainFixturesGenerated.kt")
+        content shouldContain "class co_example_domain_User__address__FieldScope"
         content shouldContain
-            "fun OverrideScope<co.example.domain.User>.address(block: OverrideScope<co.example.domain.Address>.() -> Unit)"
-        content shouldContain "registry.generator<co.example.domain.Address>(block = block)"
+            "fun OverrideScope<co.example.domain.User>.address(block: co_example_domain_User__address__FieldScope.() -> Generator<co.example.domain.Address>)"
+        content shouldContain
+            "fun OverrideScope<co.example.domain.User>.address(block: co_example_domain_User__address__FieldScope.() -> Arb<co.example.domain.Address>)"
+        content shouldContain
+            "fun OverrideScope<co.example.domain.User>.address(block: co_example_domain_User__address__FieldScope.() -> Unit)"
+        content shouldContain "registry.generatorFor<co.example.domain.Address>(typeOf<co.example.domain.Address>()"
+        content shouldContain "ActiveOverrides.from(scope.child)"
+        content shouldContain "var co_example_domain_User__address__FieldScope.street: String?"
+        content shouldContain
+            "fun co_example_domain_User__address__FieldScope.street(block: PropOverrideScope<String>.() -> Generator<String>)"
+        content shouldContain
+            "fun co_example_domain_User__address__FieldScope.street(block: PropOverrideScope<String>.() -> Arb<String>)"
+    }
+
+    test("generates distinct field scopes for multiple params of same complex type") {
+        val source =
+            SourceFile.kotlin(
+                "Domain.kt",
+                """
+                package co.example.domain
+                import io.kofixture.core.Kofixture
+                data class Address(val street: String, val city: String)
+                data class User(val home: Address, val work: Address)
+                @Kofixture(packages = ["co.example.domain"])
+                object DomainFixtures
+                """.trimIndent(),
+            )
+        val result = compile(source)
+        result.exitCode shouldBe KotlinCompilation.ExitCode.OK
+        val content = result.generatedContent("DomainFixturesGenerated.kt")
+        content shouldContain "class co_example_domain_User__home__FieldScope"
+        content shouldContain "class co_example_domain_User__work__FieldScope"
+        content shouldContain
+            "fun OverrideScope<co.example.domain.User>.home(block: co_example_domain_User__home__FieldScope.() -> Generator<co.example.domain.Address>)"
+        content shouldContain
+            "fun OverrideScope<co.example.domain.User>.work(block: co_example_domain_User__work__FieldScope.() -> Generator<co.example.domain.Address>)"
+        content shouldContain "var co_example_domain_User__home__FieldScope.street: String?"
+        content shouldContain "var co_example_domain_User__work__FieldScope.street: String?"
     }
 
     test("generates Arb overloads when kotest-property is in classpath") {
@@ -223,9 +264,11 @@ class KofixtureProcessorTest : FunSpec({
         val content = result.generatedContent("DomainFixturesGenerated.kt")
         content shouldContain "import io.kotest.property.Arb"
         content shouldContain "import io.kofixture.kotest.arb.ArbGenerator"
-        content shouldContain "fun OverrideScope<co.example.domain.Person>.name(arb: Arb<String>)"
-        content shouldContain "fun OverrideScope<co.example.domain.Person>.age(arb: Arb<Int>)"
-        content shouldContain "ArbGenerator(arb)"
+        content shouldContain
+            "fun OverrideScope<co.example.domain.Person>.name(block: OverrideScope<co.example.domain.Person>.() -> Arb<String>)"
+        content shouldContain
+            "fun OverrideScope<co.example.domain.Person>.age(block: OverrideScope<co.example.domain.Person>.() -> Arb<Int>)"
+        content shouldContain "ArbGenerator(scope.block())"
     }
 
     test("generates nullable-aware type signatures for nullable params") {
@@ -244,7 +287,91 @@ class KofixtureProcessorTest : FunSpec({
         result.exitCode shouldBe KotlinCompilation.ExitCode.OK
         val content = result.generatedContent("DomainFixturesGenerated.kt")
         content shouldContain "var OverrideScope<co.example.domain.Person>.name: String?"
-        content shouldContain "fun OverrideScope<co.example.domain.Person>.name(block: (Random) -> String?)"
+        content shouldContain
+            "fun OverrideScope<co.example.domain.Person>.name(block: OverrideScope<co.example.domain.Person>.() -> Generator<String?>)"
+    }
+
+    test("generates @JvmName on value setter to prevent platform declaration clash") {
+        val source =
+            SourceFile.kotlin(
+                "Domain.kt",
+                """
+                package co.example.domain
+                import io.kofixture.core.Kofixture
+                enum class Status { ACTIVE, INACTIVE }
+                data class Person(val status: Status)
+                data class Project(val status: Status)
+                @Kofixture(packages = ["co.example.domain"])
+                object DomainFixtures
+                """.trimIndent(),
+            )
+        val result = compile(source)
+        result.exitCode shouldBe KotlinCompilation.ExitCode.OK
+        val content = result.generatedContent("DomainFixturesGenerated.kt")
+        content shouldContain "@get:JvmName(\"co_example_domain_Person__status__get\")"
+        content shouldContain "@set:JvmName(\"co_example_domain_Person__status__set\")"
+        content shouldContain "@get:JvmName(\"co_example_domain_Project__status__get\")"
+        content shouldContain "@set:JvmName(\"co_example_domain_Project__status__set\")"
+    }
+
+    test("uses FQN for java.math.BigDecimal in generated code") {
+        val source =
+            SourceFile.kotlin(
+                "Domain.kt",
+                """
+                package co.example.domain
+                import io.kofixture.core.Kofixture
+                import java.math.BigDecimal
+                data class Invoice(val amount: BigDecimal, val tax: BigDecimal)
+                @Kofixture(packages = ["co.example.domain"])
+                object DomainFixtures
+                """.trimIndent(),
+            )
+        val result = compile(source)
+        result.exitCode shouldBe KotlinCompilation.ExitCode.OK
+        val content = result.generatedContent("DomainFixturesGenerated.kt")
+        content shouldContain "java.math.BigDecimal"
+        content shouldNotContain "var OverrideScope<co.example.domain.Invoice>.amount: BigDecimal?"
+    }
+
+    test("skips class with private primary constructor") {
+        val source =
+            SourceFile.kotlin(
+                "Domain.kt",
+                """
+                package co.example.domain
+                import io.kofixture.core.Kofixture
+                class Singleton private constructor() { companion object { val INSTANCE = Singleton() } }
+                data class Person(val name: String)
+                @Kofixture(packages = ["co.example.domain"])
+                object DomainFixtures
+                """.trimIndent(),
+            )
+        val result = compile(source)
+        result.exitCode shouldBe KotlinCompilation.ExitCode.OK
+        val content = result.generatedContent("DomainFixturesGenerated.kt")
+        content shouldNotContain "register<co.example.domain.Singleton>"
+        content shouldContain "register<co.example.domain.Person>"
+    }
+
+    test("excludedClasses are omitted from generated module") {
+        val source =
+            SourceFile.kotlin(
+                "Domain.kt",
+                """
+                package co.example.domain
+                import io.kofixture.core.Kofixture
+                data class Person(val name: String)
+                data class Internal(val id: Int)
+                @Kofixture(packages = ["co.example.domain"], excludedClasses = [Internal::class])
+                object DomainFixtures
+                """.trimIndent(),
+            )
+        val result = compile(source)
+        result.exitCode shouldBe KotlinCompilation.ExitCode.OK
+        val content = result.generatedContent("DomainFixturesGenerated.kt")
+        content shouldContain "register<co.example.domain.Person>"
+        content shouldNotContain "register<co.example.domain.Internal>"
     }
 
     test("OverrideScope value override works at runtime") {

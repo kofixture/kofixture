@@ -154,6 +154,83 @@ class KofixtureIntegrationTest : FunSpec({
         seen shouldBe setOf("Active", "Inactive")
     }
 
+    test("Arb lambda overload works at runtime") {
+        val result =
+            compile(
+                SourceFile.kotlin(
+                    "Domain.kt",
+                    """
+                    package co.example.domain
+                    import io.kofixture.core.Generator
+                    import io.kofixture.core.buildRegistry
+                    import io.kofixture.core.register
+                    import io.kofixture.core.Kofixture
+                    import io.kotest.property.Arb
+                    import io.kotest.property.arbitrary.constant
+
+                    data class Person(val name: String)
+
+                    @Kofixture(packages = ["co.example.domain"])
+                    object DomainFixtures
+
+                    fun samplePerson(): Any = buildRegistry {
+                        register<String> { Generator { _ -> "default" } }
+                        includes(domainFixtures)
+                    }.sample<Person> { name { Arb.constant("Bob") } }
+                    """.trimIndent(),
+                ),
+            )
+        result.exitCode shouldBe KotlinCompilation.ExitCode.OK
+        val person = result.invoke("samplePerson")!!
+        person.javaClass
+            .getDeclaredField("name")
+            .apply { isAccessible = true }
+            .get(person) shouldBe "Bob"
+    }
+
+    test("Arb lambda override works for complex types") {
+        val result =
+            compile(
+                SourceFile.kotlin(
+                    "Domain.kt",
+                    """
+                    package co.example.domain
+                    import io.kofixture.core.Generator
+                    import io.kofixture.core.buildRegistry
+                    import io.kofixture.core.register
+                    import io.kofixture.core.Kofixture
+                    import io.kotest.property.arbitrary.arbitrary
+
+                    data class Address(val street: String)
+                    data class User(val name: String, val address: Address)
+                    data class Assignment(val user: User)
+
+                    @Kofixture(packages = ["co.example.domain"])
+                    object DomainFixtures
+
+                    fun sampleAssignment(): Any = buildRegistry {
+                        register<String> { Generator { _ -> "default" } }
+                        includes(domainFixtures)
+                    }.sample<Assignment> {
+                        user { arbitrary { User("Joe", Address("Main St")) } }
+                    }
+                    """.trimIndent(),
+                ),
+            )
+
+        result.exitCode shouldBe KotlinCompilation.ExitCode.OK
+        val assignment = result.invoke("sampleAssignment")!!
+        val user =
+            assignment.javaClass
+                .getDeclaredField("user")
+                .apply { isAccessible = true }
+                .get(assignment)
+        user.javaClass
+            .getDeclaredField("name")
+            .apply { isAccessible = true }
+            .get(user) shouldBe "Joe"
+    }
+
     test("enum — all constants produced across many samples") {
         val result =
             compile(
