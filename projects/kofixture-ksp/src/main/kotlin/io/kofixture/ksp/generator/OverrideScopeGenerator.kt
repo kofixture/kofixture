@@ -4,6 +4,7 @@ package io.kofixture.ksp.generator
 
 import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSValueParameter
 import com.google.devtools.ksp.symbol.Modifier
@@ -13,15 +14,18 @@ internal class OverrideScopeGenerator(
     private val moduleGen: FixtureModuleGenerator,
     private val hasArb: Boolean,
 ) {
+    private lateinit var classByFqn: Map<String, KSClassDeclaration>
+    private val generatedScopeClasses = mutableSetOf<String>()
+
     fun writeExtensions(
         classes: List<KSClassDeclaration>,
         writer: Writer,
     ) {
-        val classByFqn =
-            classes.mapNotNull { decl -> decl.qualifiedName?.asString()?.let { it to decl } }.toMap()
+        classByFqn = classes.mapNotNull { decl -> decl.qualifiedName?.asString()?.let { it to decl } }.toMap()
         val targets =
             classes.filter {
                 it.classKind == ClassKind.CLASS &&
+                    it.typeParameters.isEmpty() &&
                     Modifier.SEALED !in it.modifiers &&
                     (it.primaryConstructor?.parameters?.isNotEmpty() == true)
             }
@@ -32,32 +36,30 @@ internal class OverrideScopeGenerator(
         if (hasComplexParams) {
             writeFixtureDsl(writer)
         }
-        val generatedScopeClasses = mutableSetOf<String>()
+        generatedScopeClasses.clear()
         for (klass in targets) {
-            writeClassExtensions(klass, writer, classByFqn, generatedScopeClasses)
+            writeClassExtensions(klass, writer)
         }
     }
 
     private fun writeClassExtensions(
         klass: KSClassDeclaration,
         writer: Writer,
-        classByFqn: Map<String, KSClassDeclaration>,
-        generatedScopeClasses: MutableSet<String>,
     ) {
         val fqn = klass.qualifiedName?.asString() ?: return
         val params = klass.primaryConstructor?.parameters ?: return
         writer.write("\n")
-        params.forEach { param -> writeParamExtensions(fqn, param, writer, classByFqn, generatedScopeClasses) }
+        params.forEach { param -> writeParamExtensions(klass, fqn, param, writer) }
     }
 
     private fun writeParamExtensions(
+        owner: KSClassDeclaration,
         fqn: String,
         param: KSValueParameter,
         writer: Writer,
-        classByFqn: Map<String, KSClassDeclaration>,
-        generatedScopeClasses: MutableSet<String>,
     ) {
         val name = param.name?.asString() ?: return
+        if (shouldSkipParam(owner, param, name)) return
         val type = param.type.resolve()
         val typeName = moduleGen.renderKSType(type)
         writeValueSetter(fqn, name, typeName, writer)
@@ -80,6 +82,22 @@ internal class OverrideScopeGenerator(
                 writeArbLambdaOverload(fqn, name, fqn, typeName, writer)
             }
         }
+    }
+
+    private fun shouldSkipParam(
+        owner: KSClassDeclaration,
+        param: KSValueParameter,
+        name: String,
+    ): Boolean {
+        val property =
+            owner.declarations
+                .filterIsInstance<KSPropertyDeclaration>()
+                .firstOrNull { it.simpleName.asString() == name }
+        val isPrivateProperty = property != null && Modifier.PRIVATE in property.modifiers
+        val parentProperty = param.parent as? KSPropertyDeclaration
+        val isPrivateParent = parentProperty != null && Modifier.PRIVATE in parentProperty.modifiers
+        val isPrivateCtorParam = isPrivateConstructorParam(owner, name)
+        return isPrivateProperty || isPrivateParent || isPrivateCtorParam
     }
 
     private fun complexTypeFqn(type: KSType): String? {
@@ -291,6 +309,57 @@ internal class OverrideScopeGenerator(
         writer.write("    )\n")
         writer.write("}\n")
         writer.write("\n")
+    }
+
+    private fun isPrivateConstructorParam(
+        owner: KSClassDeclaration,
+        name: String,
+    ): Boolean {
+        val filePath = owner.containingFile?.filePath
+        val file = filePath?.let { java.io.File(it) }
+        val text = if (file?.exists() == true) file.readText() else null
+        val pattern = Regex("""\bprivate\s+(val|var)\s+$name\b""")
+        val paramsBlock =
+            if (text != null && pattern.containsMatchIn(text)) {
+                extractConstructorParamsBlock(text, owner.simpleName.asString())
+            } else {
+                null
+            }
+        return paramsBlock?.let { pattern.containsMatchIn(it) } ?: false
+    }
+
+    private fun extractConstructorParamsBlock(
+        text: String,
+        className: String,
+    ): String? {
+        val classMatch = Regex("""\bclass\s+$className\b""").find(text)
+        val startIdx = classMatch?.let { text.indexOf('(', it.range.last) } ?: -1
+        var depth = 0
+        var endIdx = -1
+        if (startIdx >= 0) {
+            endIdx = findMatchingParen(text, startIdx)
+        }
+        return if (startIdx == -1 || endIdx == -1) null else text.substring(startIdx + 1, endIdx)
+    }
+
+    private fun findMatchingParen(
+        text: String,
+        startIdx: Int,
+    ): Int {
+        var depth = 0
+        for (i in startIdx until text.length) {
+            when (text[i]) {
+                '(' -> {
+                    depth += 1
+                }
+
+                ')' -> {
+                    depth -= 1
+                    if (depth == 0) return i
+                }
+            }
+        }
+        return -1
     }
 
     private fun writeValueSetter(

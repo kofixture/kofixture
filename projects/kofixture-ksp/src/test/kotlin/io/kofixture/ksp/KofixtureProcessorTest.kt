@@ -291,6 +291,26 @@ class KofixtureProcessorTest : FunSpec({
             "fun OverrideScope<co.example.domain.Person>.name(block: OverrideScope<co.example.domain.Person>.() -> Generator<String?>)"
     }
 
+    test("skips override extensions for private constructor params") {
+        val source =
+            SourceFile.kotlin(
+                "Domain.kt",
+                """
+                package co.example.domain
+                import io.kofixture.core.Kofixture
+                import java.time.Instant
+                data class FixedClock(private val fixedInstant: Instant, val name: String)
+                @Kofixture(packages = ["co.example.domain"])
+                object DomainFixtures
+                """.trimIndent(),
+            )
+        val result = compile(source)
+        result.exitCode shouldBe KotlinCompilation.ExitCode.OK
+        val content = result.generatedContent("DomainFixturesGenerated.kt")
+        content shouldNotContain "OverrideScope<co.example.domain.FixedClock>.fixedInstant"
+        content shouldContain "OverrideScope<co.example.domain.FixedClock>.name"
+    }
+
     test("generates @JvmName on value setter to prevent platform declaration clash") {
         val source =
             SourceFile.kotlin(
