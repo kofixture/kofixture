@@ -2,6 +2,7 @@
 
 package io.kofixture.ksp.generator
 
+import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
@@ -13,15 +14,18 @@ internal class OverrideScopeGenerator(
     private val moduleGen: FixtureModuleGenerator,
     private val hasArb: Boolean,
 ) {
+    private lateinit var classByFqn: Map<String, KSClassDeclaration>
+    private val generatedScopeClasses = mutableSetOf<String>()
+
     fun writeExtensions(
         classes: List<KSClassDeclaration>,
         writer: Writer,
     ) {
-        val classByFqn =
-            classes.mapNotNull { decl -> decl.qualifiedName?.asString()?.let { it to decl } }.toMap()
+        classByFqn = classes.mapNotNull { decl -> decl.qualifiedName?.asString()?.let { it to decl } }.toMap()
         val targets =
             classes.filter {
                 it.classKind == ClassKind.CLASS &&
+                    it.typeParameters.isEmpty() &&
                     Modifier.SEALED !in it.modifiers &&
                     (it.primaryConstructor?.parameters?.isNotEmpty() == true)
             }
@@ -32,32 +36,30 @@ internal class OverrideScopeGenerator(
         if (hasComplexParams) {
             writeFixtureDsl(writer)
         }
-        val generatedScopeClasses = mutableSetOf<String>()
+        generatedScopeClasses.clear()
         for (klass in targets) {
-            writeClassExtensions(klass, writer, classByFqn, generatedScopeClasses)
+            writeClassExtensions(klass, writer)
         }
     }
 
     private fun writeClassExtensions(
         klass: KSClassDeclaration,
         writer: Writer,
-        classByFqn: Map<String, KSClassDeclaration>,
-        generatedScopeClasses: MutableSet<String>,
     ) {
         val fqn = klass.qualifiedName?.asString() ?: return
         val params = klass.primaryConstructor?.parameters ?: return
         writer.write("\n")
-        params.forEach { param -> writeParamExtensions(fqn, param, writer, classByFqn, generatedScopeClasses) }
+        params.forEach { param -> writeParamExtensions(klass, fqn, param, writer) }
     }
 
     private fun writeParamExtensions(
+        owner: KSClassDeclaration,
         fqn: String,
         param: KSValueParameter,
         writer: Writer,
-        classByFqn: Map<String, KSClassDeclaration>,
-        generatedScopeClasses: MutableSet<String>,
     ) {
         val name = param.name?.asString() ?: return
+        if (shouldSkipParam(owner, name)) return
         val type = param.type.resolve()
         val typeName = moduleGen.renderKSType(type)
         writeValueSetter(fqn, name, typeName, writer)
@@ -80,6 +82,17 @@ internal class OverrideScopeGenerator(
                 writeArbLambdaOverload(fqn, name, fqn, typeName, writer)
             }
         }
+    }
+
+    private fun shouldSkipParam(
+        owner: KSClassDeclaration,
+        name: String,
+    ): Boolean {
+        val property =
+            owner
+                .getDeclaredProperties()
+                .firstOrNull { it.simpleName.asString() == name }
+        return property == null || Modifier.PRIVATE in property.modifiers
     }
 
     private fun complexTypeFqn(type: KSType): String? {
@@ -261,7 +274,8 @@ internal class OverrideScopeGenerator(
         fieldName: String,
     ): String {
         val safeField = fieldName.replace(Regex("[^A-Za-z0-9_]"), "_")
-        return "${parentFqn.replace('.', '_')}__${safeField}__FieldScope"
+        val hash = fieldName.hashCode().toString().replace("-", "m")
+        return "${parentFqn.replace('.', '_')}__${safeField}__${hash}__FieldScope"
     }
 
     private fun writeFieldScopeClass(

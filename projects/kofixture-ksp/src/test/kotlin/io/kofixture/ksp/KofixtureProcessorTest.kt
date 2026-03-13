@@ -202,20 +202,20 @@ class KofixtureProcessorTest : FunSpec({
         val result = compile(source)
         result.exitCode shouldBe KotlinCompilation.ExitCode.OK
         val content = result.generatedContent("DomainFixturesGenerated.kt")
-        content shouldContain "class co_example_domain_User__address__FieldScope"
+        content shouldContain "class co_example_domain_User__address__m1147692044__FieldScope"
         content shouldContain
-            "fun OverrideScope<co.example.domain.User>.address(block: co_example_domain_User__address__FieldScope.() -> Generator<co.example.domain.Address>)"
+            "fun OverrideScope<co.example.domain.User>.address(block: co_example_domain_User__address__m1147692044__FieldScope.() -> Generator<co.example.domain.Address>)"
         content shouldContain
-            "fun OverrideScope<co.example.domain.User>.address(block: co_example_domain_User__address__FieldScope.() -> Arb<co.example.domain.Address>)"
+            "fun OverrideScope<co.example.domain.User>.address(block: co_example_domain_User__address__m1147692044__FieldScope.() -> Arb<co.example.domain.Address>)"
         content shouldContain
-            "fun OverrideScope<co.example.domain.User>.address(block: co_example_domain_User__address__FieldScope.() -> Unit)"
+            "fun OverrideScope<co.example.domain.User>.address(block: co_example_domain_User__address__m1147692044__FieldScope.() -> Unit)"
         content shouldContain "registry.generatorFor<co.example.domain.Address>(typeOf<co.example.domain.Address>()"
         content shouldContain "ActiveOverrides.from(scope.child)"
-        content shouldContain "var co_example_domain_User__address__FieldScope.street: String?"
+        content shouldContain "var co_example_domain_User__address__m1147692044__FieldScope.street: String?"
         content shouldContain
-            "fun co_example_domain_User__address__FieldScope.street(block: PropOverrideScope<String>.() -> Generator<String>)"
+            "fun co_example_domain_User__address__m1147692044__FieldScope.street(block: PropOverrideScope<String>.() -> Generator<String>)"
         content shouldContain
-            "fun co_example_domain_User__address__FieldScope.street(block: PropOverrideScope<String>.() -> Arb<String>)"
+            "fun co_example_domain_User__address__m1147692044__FieldScope.street(block: PropOverrideScope<String>.() -> Arb<String>)"
     }
 
     test("generates distinct field scopes for multiple params of same complex type") {
@@ -234,14 +234,14 @@ class KofixtureProcessorTest : FunSpec({
         val result = compile(source)
         result.exitCode shouldBe KotlinCompilation.ExitCode.OK
         val content = result.generatedContent("DomainFixturesGenerated.kt")
-        content shouldContain "class co_example_domain_User__home__FieldScope"
-        content shouldContain "class co_example_domain_User__work__FieldScope"
+        content shouldContain "class co_example_domain_User__home__3208415__FieldScope"
+        content shouldContain "class co_example_domain_User__work__3655441__FieldScope"
         content shouldContain
-            "fun OverrideScope<co.example.domain.User>.home(block: co_example_domain_User__home__FieldScope.() -> Generator<co.example.domain.Address>)"
+            "fun OverrideScope<co.example.domain.User>.home(block: co_example_domain_User__home__3208415__FieldScope.() -> Generator<co.example.domain.Address>)"
         content shouldContain
-            "fun OverrideScope<co.example.domain.User>.work(block: co_example_domain_User__work__FieldScope.() -> Generator<co.example.domain.Address>)"
-        content shouldContain "var co_example_domain_User__home__FieldScope.street: String?"
-        content shouldContain "var co_example_domain_User__work__FieldScope.street: String?"
+            "fun OverrideScope<co.example.domain.User>.work(block: co_example_domain_User__work__3655441__FieldScope.() -> Generator<co.example.domain.Address>)"
+        content shouldContain "var co_example_domain_User__home__3208415__FieldScope.street: String?"
+        content shouldContain "var co_example_domain_User__work__3655441__FieldScope.street: String?"
     }
 
     test("generates Arb overloads when kotest-property is in classpath") {
@@ -289,6 +289,26 @@ class KofixtureProcessorTest : FunSpec({
         content shouldContain "var OverrideScope<co.example.domain.Person>.name: String?"
         content shouldContain
             "fun OverrideScope<co.example.domain.Person>.name(block: OverrideScope<co.example.domain.Person>.() -> Generator<String?>)"
+    }
+
+    test("skips override extensions for private constructor params") {
+        val source =
+            SourceFile.kotlin(
+                "Domain.kt",
+                """
+                package co.example.domain
+                import io.kofixture.core.Kofixture
+                import java.time.Instant
+                data class FixedClock(private val fixedInstant: Instant, val name: String)
+                @Kofixture(packages = ["co.example.domain"])
+                object DomainFixtures
+                """.trimIndent(),
+            )
+        val result = compile(source)
+        result.exitCode shouldBe KotlinCompilation.ExitCode.OK
+        val content = result.generatedContent("DomainFixturesGenerated.kt")
+        content shouldNotContain "OverrideScope<co.example.domain.FixedClock>.fixedInstant"
+        content shouldContain "OverrideScope<co.example.domain.FixedClock>.name"
     }
 
     test("generates @JvmName on value setter to prevent platform declaration clash") {
