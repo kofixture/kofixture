@@ -54,7 +54,7 @@ internal class FixtureModuleGenerator(private val logger: KSPLogger) {
             collectSealedDfs(subtype, result, processed)
         }
         val qn = klass.qualifiedName?.asString() ?: return
-        if (qn !in processed && Modifier.ABSTRACT !in klass.modifiers) {
+        if (qn !in processed && Modifier.ABSTRACT !in klass.modifiers && klass.typeParameters.isEmpty()) {
             result.add(klass)
             processed.add(qn)
         }
@@ -102,8 +102,13 @@ internal class FixtureModuleGenerator(private val logger: KSPLogger) {
         }
         writer.write("    register<$fqn> {\n")
         writer.write("        val generators = listOf<Generator<$fqn>>(\n")
-        for (sub in subtypes) {
-            val subFqn = sub.qualifiedName?.asString() ?: continue
+        val eligibleSubtypes =
+            subtypes
+                .asSequence()
+                .filter { it.typeParameters.isEmpty() }
+                .mapNotNull { it.qualifiedName?.asString() }
+                .toList()
+        for (subFqn in eligibleSubtypes) {
             writer.write("            registry.generatorFor(typeOf<$subFqn>(), null, activeOverrides),\n")
         }
         writer.write("        )\n")
@@ -146,7 +151,7 @@ internal class FixtureModuleGenerator(private val logger: KSPLogger) {
         val fqn = decl.qualifiedName?.asString() ?: return decl.simpleName.asString()
         val pkg = fqn.substringBeforeLast('.', missingDelimiterValue = "")
         val name =
-            if (pkg == "kotlin" || pkg.startsWith("kotlin.")) {
+            if (isDefaultImportedKotlinPackage(pkg)) {
                 decl.simpleName.asString()
             } else {
                 fqn
@@ -163,5 +168,14 @@ internal class FixtureModuleGenerator(private val logger: KSPLogger) {
                 }
             }}>$nullable"
         }
+    }
+
+    private fun isDefaultImportedKotlinPackage(pkg: String): Boolean {
+        if (pkg == "kotlin") return true
+        return pkg.startsWith("kotlin.collections") ||
+            pkg.startsWith("kotlin.ranges") ||
+            pkg.startsWith("kotlin.sequences") ||
+            pkg.startsWith("kotlin.text") ||
+            pkg.startsWith("kotlin.io")
     }
 }

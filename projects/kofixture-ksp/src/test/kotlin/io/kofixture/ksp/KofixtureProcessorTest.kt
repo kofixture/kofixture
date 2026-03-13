@@ -354,6 +354,47 @@ class KofixtureProcessorTest : FunSpec({
         content shouldNotContain "var OverrideScope<co.example.domain.Invoice>.amount: BigDecimal?"
     }
 
+    test("uses FQN for kotlin.time.Instant in generated code") {
+        val source =
+            SourceFile.kotlin(
+                "Domain.kt",
+                """
+                package co.example.domain
+                import io.kofixture.core.Kofixture
+                import kotlin.time.Instant
+                data class FixedClock(val instant: Instant)
+                @Kofixture(packages = ["co.example.domain"])
+                object DomainFixtures
+                """.trimIndent(),
+            )
+        val result = compile(source)
+        result.exitCode shouldBe KotlinCompilation.ExitCode.OK
+        val content = result.generatedContent("DomainFixturesGenerated.kt")
+        content shouldContain "kotlin.time.Instant"
+    }
+
+    test("skips generic sealed subtypes in sealed registration") {
+        val source =
+            SourceFile.kotlin(
+                "Domain.kt",
+                """
+                package co.example.domain
+                import io.kofixture.core.Kofixture
+                sealed interface DomainError
+                data class NotFound<T>(val error: String) : DomainError
+                data class Unauthorized(val error: String) : DomainError
+                @Kofixture(packages = ["co.example.domain"])
+                object DomainFixtures
+                """.trimIndent(),
+            )
+        val result = compile(source)
+        result.exitCode shouldBe KotlinCompilation.ExitCode.OK
+        val content = result.generatedContent("DomainFixturesGenerated.kt")
+        content shouldContain "register<co.example.domain.DomainError>"
+        content shouldContain "co.example.domain.Unauthorized"
+        content shouldNotContain "co.example.domain.NotFound"
+    }
+
     test("skips class with private primary constructor") {
         val source =
             SourceFile.kotlin(
