@@ -2,9 +2,9 @@
 
 package io.kofixture.ksp.generator
 
+import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSValueParameter
 import com.google.devtools.ksp.symbol.Modifier
@@ -59,7 +59,7 @@ internal class OverrideScopeGenerator(
         writer: Writer,
     ) {
         val name = param.name?.asString() ?: return
-        if (shouldSkipParam(owner, param, name)) return
+        if (shouldSkipParam(owner, name)) return
         val type = param.type.resolve()
         val typeName = moduleGen.renderKSType(type)
         writeValueSetter(fqn, name, typeName, writer)
@@ -86,18 +86,13 @@ internal class OverrideScopeGenerator(
 
     private fun shouldSkipParam(
         owner: KSClassDeclaration,
-        param: KSValueParameter,
         name: String,
     ): Boolean {
         val property =
-            owner.declarations
-                .filterIsInstance<KSPropertyDeclaration>()
+            owner
+                .getDeclaredProperties()
                 .firstOrNull { it.simpleName.asString() == name }
-        val isPrivateProperty = property != null && Modifier.PRIVATE in property.modifiers
-        val parentProperty = param.parent as? KSPropertyDeclaration
-        val isPrivateParent = parentProperty != null && Modifier.PRIVATE in parentProperty.modifiers
-        val isPrivateCtorParam = isPrivateConstructorParam(owner, name)
-        return isPrivateProperty || isPrivateParent || isPrivateCtorParam
+        return property == null || Modifier.PRIVATE in property.modifiers
     }
 
     private fun complexTypeFqn(type: KSType): String? {
@@ -279,7 +274,8 @@ internal class OverrideScopeGenerator(
         fieldName: String,
     ): String {
         val safeField = fieldName.replace(Regex("[^A-Za-z0-9_]"), "_")
-        return "${parentFqn.replace('.', '_')}__${safeField}__FieldScope"
+        val hash = fieldName.hashCode().toString().replace("-", "m")
+        return "${parentFqn.replace('.', '_')}__${safeField}__${hash}__FieldScope"
     }
 
     private fun writeFieldScopeClass(
@@ -309,57 +305,6 @@ internal class OverrideScopeGenerator(
         writer.write("    )\n")
         writer.write("}\n")
         writer.write("\n")
-    }
-
-    private fun isPrivateConstructorParam(
-        owner: KSClassDeclaration,
-        name: String,
-    ): Boolean {
-        val filePath = owner.containingFile?.filePath
-        val file = filePath?.let { java.io.File(it) }
-        val text = if (file?.exists() == true) file.readText() else null
-        val pattern = Regex("""\bprivate\s+(val|var)\s+$name\b""")
-        val paramsBlock =
-            if (text != null && pattern.containsMatchIn(text)) {
-                extractConstructorParamsBlock(text, owner.simpleName.asString())
-            } else {
-                null
-            }
-        return paramsBlock?.let { pattern.containsMatchIn(it) } ?: false
-    }
-
-    private fun extractConstructorParamsBlock(
-        text: String,
-        className: String,
-    ): String? {
-        val classMatch = Regex("""\bclass\s+$className\b""").find(text)
-        val startIdx = classMatch?.let { text.indexOf('(', it.range.last) } ?: -1
-        var depth = 0
-        var endIdx = -1
-        if (startIdx >= 0) {
-            endIdx = findMatchingParen(text, startIdx)
-        }
-        return if (startIdx == -1 || endIdx == -1) null else text.substring(startIdx + 1, endIdx)
-    }
-
-    private fun findMatchingParen(
-        text: String,
-        startIdx: Int,
-    ): Int {
-        var depth = 0
-        for (i in startIdx until text.length) {
-            when (text[i]) {
-                '(' -> {
-                    depth += 1
-                }
-
-                ')' -> {
-                    depth -= 1
-                    if (depth == 0) return i
-                }
-            }
-        }
-        return -1
     }
 
     private fun writeValueSetter(

@@ -1,5 +1,6 @@
 package io.kofixture.ksp.generator
 
+import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSClassDeclaration
@@ -117,11 +118,16 @@ internal class FixtureModuleGenerator(private val logger: KSPLogger) {
         val fqn = klass.qualifiedName?.asString() ?: return
         val params = klass.primaryConstructor?.parameters ?: emptyList()
         val paramNames = params.mapNotNull { it.name?.asString() }
-        val hasPrivateParam = paramNames.any { isPrivateConstructorParam(klass, it) }
+        val propertyByName = klass.getDeclaredProperties().associateBy { it.simpleName.asString() }
+        val hasInvalidParam =
+            paramNames.any { name ->
+                val property = propertyByName[name]
+                property == null || Modifier.PRIVATE in property.modifiers
+            }
         if (params.isEmpty()) {
             writer.write("    register<$fqn> { Generator { _ -> $fqn() } }\n")
-        } else if (hasPrivateParam) {
-            logger.warn("Class $fqn has private constructor parameters — skipping register")
+        } else if (hasInvalidParam) {
+            logger.warn("Class $fqn has non-public constructor parameters — skipping register")
         } else {
             writer.write("    register<$fqn> {\n")
             writer.write("        Generator { random ->\n")
@@ -133,55 +139,6 @@ internal class FixtureModuleGenerator(private val logger: KSPLogger) {
             writer.write("        }\n")
             writer.write("    }\n")
         }
-    }
-
-    @Suppress("CyclomaticComplexMethod", "ReturnCount")
-    private fun isPrivateConstructorParam(
-        owner: KSClassDeclaration,
-        name: String,
-    ): Boolean {
-        val filePath = owner.containingFile?.filePath
-        val file = filePath?.let { java.io.File(it) }
-        val text = if (file?.exists() == true) file.readText() else null
-        val className = owner.simpleName.asString()
-        val pattern = Regex("""\bprivate\s+(val|var)\s+$name\b""")
-
-        fun extractConstructorParamsBlock(source: String): String? {
-            val classMatch = Regex("""\bclass\s+$className\b""").find(source)
-            val startIdx = classMatch?.let { source.indexOf('(', it.range.last) } ?: -1
-            var endIdx = -1
-            if (startIdx >= 0) {
-                endIdx = findMatchingParen(source, startIdx)
-            }
-            return if (startIdx == -1 || endIdx == -1) null else source.substring(startIdx + 1, endIdx)
-        }
-        val paramsBlock =
-            if (text != null && pattern.containsMatchIn(text)) {
-                extractConstructorParamsBlock(text)
-            } else {
-                null
-            }
-        return paramsBlock?.let { pattern.containsMatchIn(it) } ?: false
-    }
-
-    private fun findMatchingParen(
-        text: String,
-        startIdx: Int,
-    ): Int {
-        var depth = 0
-        for (i in startIdx until text.length) {
-            when (text[i]) {
-                '(' -> {
-                    depth += 1
-                }
-
-                ')' -> {
-                    depth -= 1
-                    if (depth == 0) return i
-                }
-            }
-        }
-        return -1
     }
 
     internal fun renderKSType(type: KSType): String {
