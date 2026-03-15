@@ -112,9 +112,10 @@ class KofixtureProcessor(
         classes: List<KSClassDeclaration>,
         hasArb: Boolean,
     ) {
+        val classesForOverrides = expandSealedSubclasses(classes)
         val hasSealed = classes.any { Modifier.SEALED in it.modifiers }
         val classesWithParams =
-            classes.filter {
+            classesForOverrides.filter {
                 it.classKind == ClassKind.CLASS &&
                     Modifier.SEALED !in it.modifiers &&
                     (it.primaryConstructor?.parameters?.isNotEmpty() == true)
@@ -151,5 +152,23 @@ class KofixtureProcessor(
             moduleGen.writeModule(moduleName, classes, writer)
             OverrideScopeGenerator(moduleGen, hasArb).writeExtensions(classes, writer)
         }
+    }
+
+    private fun expandSealedSubclasses(classes: List<KSClassDeclaration>): List<KSClassDeclaration> {
+        val collected = LinkedHashMap<String, KSClassDeclaration>()
+
+        fun add(decl: KSClassDeclaration) {
+            val fqn = decl.qualifiedName?.asString() ?: return
+            collected.putIfAbsent(fqn, decl)
+        }
+
+        fun addWithSubtypes(decl: KSClassDeclaration) {
+            add(decl)
+            if (Modifier.SEALED in decl.modifiers) {
+                decl.getSealedSubclasses().forEach { addWithSubtypes(it) }
+            }
+        }
+        classes.forEach { addWithSubtypes(it) }
+        return collected.values.toList()
     }
 }

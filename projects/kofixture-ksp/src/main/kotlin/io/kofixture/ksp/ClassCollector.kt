@@ -20,14 +20,24 @@ internal class ClassCollector(private val resolver: Resolver) {
             if (seen.add(fqn) && isProcessable(decl)) result.add(decl)
         }
 
+        fun addWithNested(decl: KSClassDeclaration) {
+            fun walk(node: KSClassDeclaration) {
+                add(node)
+                node.declarations
+                    .filterIsInstance<KSClassDeclaration>()
+                    .forEach { walk(it) }
+            }
+            walk(decl)
+        }
+
         packages.forEach { pkg ->
             resolver
                 .getDeclarationsFromPackage(pkg)
                 .filterIsInstance<KSClassDeclaration>()
-                .forEach { add(it) }
+                .forEach { addWithNested(it) }
         }
 
-        explicitDecls.forEach { decl -> add(decl) }
+        explicitDecls.forEach { decl -> addWithNested(decl) }
 
         return result
     }

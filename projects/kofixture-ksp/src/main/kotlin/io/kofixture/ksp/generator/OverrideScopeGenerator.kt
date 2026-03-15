@@ -21,9 +21,10 @@ internal class OverrideScopeGenerator(
         classes: List<KSClassDeclaration>,
         writer: Writer,
     ) {
-        classByFqn = classes.mapNotNull { decl -> decl.qualifiedName?.asString()?.let { it to decl } }.toMap()
+        val allClasses = expandSealedSubclasses(classes)
+        classByFqn = allClasses.mapNotNull { decl -> decl.qualifiedName?.asString()?.let { it to decl } }.toMap()
         val targets =
-            classes.filter {
+            allClasses.filter {
                 it.classKind == ClassKind.CLASS &&
                     it.typeParameters.isEmpty() &&
                     Modifier.SEALED !in it.modifiers &&
@@ -40,6 +41,24 @@ internal class OverrideScopeGenerator(
         for (klass in targets) {
             writeClassExtensions(klass, writer)
         }
+    }
+
+    private fun expandSealedSubclasses(classes: List<KSClassDeclaration>): List<KSClassDeclaration> {
+        val collected = LinkedHashMap<String, KSClassDeclaration>()
+
+        fun add(decl: KSClassDeclaration) {
+            val fqn = decl.qualifiedName?.asString() ?: return
+            collected.putIfAbsent(fqn, decl)
+        }
+
+        fun addWithSubtypes(decl: KSClassDeclaration) {
+            add(decl)
+            if (Modifier.SEALED in decl.modifiers) {
+                decl.getSealedSubclasses().forEach { addWithSubtypes(it) }
+            }
+        }
+        classes.forEach { addWithSubtypes(it) }
+        return collected.values.toList()
     }
 
     private fun writeClassExtensions(
