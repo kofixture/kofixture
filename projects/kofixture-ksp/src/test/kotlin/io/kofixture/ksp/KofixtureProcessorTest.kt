@@ -158,6 +158,33 @@ class KofixtureProcessorTest : FunSpec({
         content shouldNotContain "register<co.example.domain.Circle>"
     }
 
+    test("collects nested data classes and generates overrides") {
+        val source =
+            SourceFile.kotlin(
+                "Domain.kt",
+                """
+                package co.example.domain
+                import io.kofixture.core.Kofixture
+
+                data class Project(val id: String) {
+                    data class Type(val label: String)
+                }
+
+                @Kofixture(packages = ["co.example.domain"])
+                object DomainFixtures
+                """.trimIndent(),
+            )
+
+        val result = compile(source)
+        result.exitCode shouldBe KotlinCompilation.ExitCode.OK
+        val content = result.generatedContent("DomainFixturesGenerated.kt")
+        content shouldContain "register<co.example.domain.Project>"
+        content shouldContain "register<co.example.domain.Project.Type>"
+        content shouldContain "var OverrideScope<co.example.domain.Project.Type>.label: String?"
+        content shouldContain
+            "fun OverrideScope<co.example.domain.Project.Type>.label(block: OverrideScope<co.example.domain.Project.Type>.() -> Generator<String>)"
+    }
+
     test("generates OverrideScope value setter and generator lambda overload for each param") {
         val source =
             SourceFile.kotlin(
@@ -184,6 +211,31 @@ class KofixtureProcessorTest : FunSpec({
         // NamedOverrideKey
         content shouldContain "NamedOverrideKey(typeOf<co.example.domain.Person>(), \"name\")"
         content shouldContain "NamedOverrideKey(typeOf<co.example.domain.Person>(), \"age\")"
+    }
+
+    test("generates OverrideScope extensions for nested sealed subtype") {
+        val source =
+            SourceFile.kotlin(
+                "Domain.kt",
+                """
+                package co.example.domain
+                import io.kofixture.core.Kofixture
+                import java.time.Instant
+
+                sealed interface AppliesStrategy {
+                    data class Immediately(val after: Instant) : AppliesStrategy
+                }
+
+                @Kofixture(packages = ["co.example.domain"])
+                object DomainFixtures
+                """.trimIndent(),
+            )
+        val result = compile(source)
+        result.exitCode shouldBe KotlinCompilation.ExitCode.OK
+        val content = result.generatedContent("DomainFixturesGenerated.kt")
+        content shouldContain "var OverrideScope<co.example.domain.AppliesStrategy.Immediately>.after: java.time.Instant?"
+        content shouldContain
+            "fun OverrideScope<co.example.domain.AppliesStrategy.Immediately>.after(block: OverrideScope<co.example.domain.AppliesStrategy.Immediately>.() -> Generator<java.time.Instant>)"
     }
 
     test("generates complex-type override overload for complex-type params") {
