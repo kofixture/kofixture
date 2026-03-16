@@ -43,34 +43,78 @@ internal class ClassCollector(private val resolver: Resolver) {
     }
 
     private fun isProcessable(decl: KSClassDeclaration): Boolean {
-        // Skip nested sealed subtypes (they are handled via DFS from their parent)
-        if (isNestedSealedSubtype(decl)) return false
+        val isExcluded = isNestedSealedSubtype(decl) || isKotlinxSerializerClass(decl)
+        return !isExcluded &&
+            when (decl.classKind) {
+                ClassKind.OBJECT -> {
+                    true
+                }
 
-        return when (decl.classKind) {
-            ClassKind.OBJECT -> {
-                true
-            }
+                ClassKind.ENUM_CLASS -> {
+                    true
+                }
 
-            ClassKind.ENUM_CLASS -> {
-                true
-            }
+                ClassKind.CLASS -> {
+                    // sealed class: ClassKind.CLASS + Modifier.SEALED
+                    // abstract class: ClassKind.CLASS + Modifier.ABSTRACT
+                    // data class / regular class: ClassKind.CLASS, neither sealed nor abstract (sealed is still allowed here)
+                    Modifier.ABSTRACT !in decl.modifiers &&
+                        decl.primaryConstructor?.modifiers?.contains(Modifier.PRIVATE) != true
+                }
 
-            ClassKind.CLASS -> {
-                // sealed class: ClassKind.CLASS + Modifier.SEALED
-                // abstract class: ClassKind.CLASS + Modifier.ABSTRACT
-                // data class / regular class: ClassKind.CLASS, neither sealed nor abstract (sealed is still allowed here)
-                Modifier.ABSTRACT !in decl.modifiers &&
-                    decl.primaryConstructor?.modifiers?.contains(Modifier.PRIVATE) != true
-            }
+                ClassKind.INTERFACE -> {
+                    Modifier.SEALED in decl.modifiers
+                }
 
-            ClassKind.INTERFACE -> {
-                Modifier.SEALED in decl.modifiers
+                else -> {
+                    false
+                }
             }
+    }
 
-            else -> {
-                false
-            }
+    private fun isKotlinxSerializerClass(decl: KSClassDeclaration): Boolean {
+        val simple = decl.simpleName.asString()
+        val hasSerializerSuffix = simple.endsWith("\$serializer")
+        val fqn = decl.qualifiedName?.asString()
+        val hasSerializerInFqn = fqn?.contains(".\$serializer") == true
+        val hasAnnotation = hasSerializerAnnotation(decl)
+        val isSerializerType = implementsKSerializer(decl)
+        return hasSerializerSuffix || hasSerializerInFqn || hasAnnotation || isSerializerType
+    }
+
+    private fun hasSerializerAnnotation(decl: KSClassDeclaration): Boolean = decl.annotations.any { annotation ->
+        val annFqn =
+            annotation.annotationType
+                .resolve()
+                .declaration.qualifiedName
+                ?.asString()
+        annFqn == "kotlinx.serialization.Serializer"
+    }
+
+    private fun implementsKSerializer(decl: KSClassDeclaration): Boolean {
+        val targets =
+            setOf(
+                "kotlinx.serialization.KSerializer",
+                "kotlinx.serialization.internal.GeneratedSerializer",
+            )
+        val visited = mutableSetOf<String>()
+
+        fun walk(node: KSClassDeclaration): Boolean {
+            val nodeFqn = node.qualifiedName?.asString()
+            val shouldWalk = nodeFqn != null && visited.add(nodeFqn)
+            val matchesTarget =
+                if (shouldWalk) {
+                    node.superTypes.any { superTypeRef ->
+                        val superDecl = superTypeRef.resolve().declaration as? KSClassDeclaration
+                        val superFqn = superDecl?.qualifiedName?.asString()
+                        superFqn in targets || (superDecl != null && walk(superDecl))
+                    }
+                } else {
+                    false
+                }
+            return matchesTarget
         }
+        return walk(decl)
     }
 
     private fun isNestedSealedSubtype(decl: KSClassDeclaration): Boolean {

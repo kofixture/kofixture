@@ -185,6 +185,56 @@ class KofixtureProcessorTest : FunSpec({
             "fun OverrideScope<co.example.domain.Project.Type>.label(block: OverrideScope<co.example.domain.Project.Type>.() -> Generator<String>)"
     }
 
+    test("skips kotlinx serialization serializer classes") {
+        val fakeSerialization =
+            SourceFile.kotlin(
+                "FakeSerialization.kt",
+                """
+                package kotlinx.serialization
+
+                interface KSerializer<T>
+                annotation class Serializer
+                """.trimIndent(),
+            )
+        val fakeSerializationInternal =
+            SourceFile.kotlin(
+                "FakeSerializationInternal.kt",
+                """
+                package kotlinx.serialization.internal
+
+                interface GeneratedSerializer<T> : kotlinx.serialization.KSerializer<T>
+                """.trimIndent(),
+            )
+
+        val source =
+            SourceFile.kotlin(
+                "Domain.kt",
+                """
+                package co.example.domain
+                import io.kofixture.core.Kofixture
+                import kotlinx.serialization.KSerializer
+                import kotlinx.serialization.Serializer
+
+                data class Project(val id: String) {
+                    class `${'$'}serializer`
+                }
+
+                @Serializer
+                class ProjectSerializer : KSerializer<Project>
+
+                @Kofixture(packages = ["co.example.domain"])
+                object DomainFixtures
+                """.trimIndent(),
+            )
+
+        val result = compile(fakeSerialization, fakeSerializationInternal, source)
+        result.exitCode shouldBe KotlinCompilation.ExitCode.OK
+        val content = result.generatedContent("DomainFixturesGenerated.kt")
+        content shouldContain "register<co.example.domain.Project>"
+        content shouldNotContain "register<co.example.domain.Project.\$serializer>"
+        content shouldNotContain "register<co.example.domain.ProjectSerializer>"
+    }
+
     test("generates OverrideScope value setter and generator lambda overload for each param") {
         val source =
             SourceFile.kotlin(
