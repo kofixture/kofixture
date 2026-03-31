@@ -9,8 +9,6 @@ indent_style = space
 indent_size = 4
 
 [*.{kt,kts}]
-# ktlint rule overrides (read by ktlint and Spotless automatically)
-# Valid values: default | always | multiline
 ktlint_function_signature_body_expression_wrapping = default
 ktlint_standard_class-signature = disabled
 

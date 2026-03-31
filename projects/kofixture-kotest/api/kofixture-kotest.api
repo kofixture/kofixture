@@ -1,13 +1,4 @@
-public abstract class io/kofixture/kotest/KofixtureAnnotationSpec : io/kotest/core/spec/style/AnnotationSpec, io/kofixture/core/KofixtureTest {
-	public fun <init> ()V
-	public fun afterSpec (Lio/kotest/core/spec/Spec;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun beforeSpec (Lio/kotest/core/spec/Spec;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun buildRegistry ()V
-	public fun getFixtureModules ()Ljava/util/List;
-	public fun registry ()Lio/kofixture/core/FixtureRegistry;
-}
-
-public abstract class io/kofixture/kotest/KofixtureBehaviorSpec : io/kotest/core/spec/style/BehaviorSpec, io/kofixture/core/KofixtureTest {
+public abstract class io/kofixture/KofixtureBehaviorSpec : io/kotest/core/spec/style/BehaviorSpec, io/kofixture/core/KofixtureTest {
 	public fun <init> ()V
 	public fun <init> (Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -15,10 +6,10 @@ public abstract class io/kofixture/kotest/KofixtureBehaviorSpec : io/kotest/core
 	public fun beforeSpec (Lio/kotest/core/spec/Spec;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun buildRegistry ()V
 	public fun getFixtureModules ()Ljava/util/List;
-	public fun registry ()Lio/kofixture/core/FixtureRegistry;
+	public fun registry ()Lio/kofixture/Registry;
 }
 
-public abstract class io/kofixture/kotest/KofixtureDescribeSpec : io/kotest/core/spec/style/DescribeSpec, io/kofixture/core/KofixtureTest {
+public abstract class io/kofixture/KofixtureDescribeSpec : io/kotest/core/spec/style/DescribeSpec, io/kofixture/core/KofixtureTest {
 	public fun <init> ()V
 	public fun <init> (Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -26,10 +17,10 @@ public abstract class io/kofixture/kotest/KofixtureDescribeSpec : io/kotest/core
 	public fun beforeSpec (Lio/kotest/core/spec/Spec;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun buildRegistry ()V
 	public fun getFixtureModules ()Ljava/util/List;
-	public fun registry ()Lio/kofixture/core/FixtureRegistry;
+	public fun registry ()Lio/kofixture/Registry;
 }
 
-public abstract class io/kofixture/kotest/KofixtureExpectSpec : io/kotest/core/spec/style/ExpectSpec, io/kofixture/core/KofixtureTest {
+public abstract class io/kofixture/KofixtureExpectSpec : io/kotest/core/spec/style/ExpectSpec, io/kofixture/core/KofixtureTest {
 	public fun <init> ()V
 	public fun <init> (Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -37,10 +28,10 @@ public abstract class io/kofixture/kotest/KofixtureExpectSpec : io/kotest/core/s
 	public fun beforeSpec (Lio/kotest/core/spec/Spec;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun buildRegistry ()V
 	public fun getFixtureModules ()Ljava/util/List;
-	public fun registry ()Lio/kofixture/core/FixtureRegistry;
+	public fun registry ()Lio/kofixture/Registry;
 }
 
-public abstract class io/kofixture/kotest/KofixtureFeatureSpec : io/kotest/core/spec/style/FeatureSpec, io/kofixture/core/KofixtureTest {
+public abstract class io/kofixture/KofixtureFeatureSpec : io/kotest/core/spec/style/FeatureSpec, io/kofixture/core/KofixtureTest {
 	public fun <init> ()V
 	public fun <init> (Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -48,10 +39,10 @@ public abstract class io/kofixture/kotest/KofixtureFeatureSpec : io/kotest/core/
 	public fun beforeSpec (Lio/kotest/core/spec/Spec;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun buildRegistry ()V
 	public fun getFixtureModules ()Ljava/util/List;
-	public fun registry ()Lio/kofixture/core/FixtureRegistry;
+	public fun registry ()Lio/kofixture/Registry;
 }
 
-public abstract class io/kofixture/kotest/KofixtureFreeSpec : io/kotest/core/spec/style/FreeSpec, io/kofixture/core/KofixtureTest {
+public abstract class io/kofixture/KofixtureFreeSpec : io/kotest/core/spec/style/FreeSpec, io/kofixture/core/KofixtureTest {
 	public fun <init> ()V
 	public fun <init> (Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -59,10 +50,10 @@ public abstract class io/kofixture/kotest/KofixtureFreeSpec : io/kotest/core/spe
 	public fun beforeSpec (Lio/kotest/core/spec/Spec;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun buildRegistry ()V
 	public fun getFixtureModules ()Ljava/util/List;
-	public fun registry ()Lio/kofixture/core/FixtureRegistry;
+	public fun registry ()Lio/kofixture/Registry;
 }
 
-public abstract class io/kofixture/kotest/KofixtureFunSpec : io/kotest/core/spec/style/FunSpec, io/kofixture/core/KofixtureTest {
+public abstract class io/kofixture/KofixtureFunSpec : io/kotest/core/spec/style/FunSpec, io/kofixture/core/KofixtureTest {
 	public fun <init> ()V
 	public fun <init> (Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -70,16 +61,10 @@ public abstract class io/kofixture/kotest/KofixtureFunSpec : io/kotest/core/spec
 	public fun beforeSpec (Lio/kotest/core/spec/Spec;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun buildRegistry ()V
 	public fun getFixtureModules ()Ljava/util/List;
-	public fun registry ()Lio/kofixture/core/FixtureRegistry;
+	public fun registry ()Lio/kofixture/Registry;
 }
 
-public final class io/kofixture/kotest/KofixtureListener : io/kotest/core/listeners/AfterSpecListener, io/kotest/core/listeners/BeforeSpecListener {
-	public fun <init> ()V
-	public fun afterSpec (Lio/kotest/core/spec/Spec;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun beforeSpec (Lio/kotest/core/spec/Spec;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public abstract class io/kofixture/kotest/KofixtureShouldSpec : io/kotest/core/spec/style/ShouldSpec, io/kofixture/core/KofixtureTest {
+public abstract class io/kofixture/KofixtureShouldSpec : io/kotest/core/spec/style/ShouldSpec, io/kofixture/core/KofixtureTest {
 	public fun <init> ()V
 	public fun <init> (Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -87,10 +72,10 @@ public abstract class io/kofixture/kotest/KofixtureShouldSpec : io/kotest/core/s
 	public fun beforeSpec (Lio/kotest/core/spec/Spec;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun buildRegistry ()V
 	public fun getFixtureModules ()Ljava/util/List;
-	public fun registry ()Lio/kofixture/core/FixtureRegistry;
+	public fun registry ()Lio/kofixture/Registry;
 }
 
-public abstract class io/kofixture/kotest/KofixtureStringSpec : io/kotest/core/spec/style/StringSpec, io/kofixture/core/KofixtureTest {
+public abstract class io/kofixture/KofixtureStringSpec : io/kotest/core/spec/style/StringSpec, io/kofixture/core/KofixtureTest {
 	public fun <init> ()V
 	public fun <init> (Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -98,10 +83,10 @@ public abstract class io/kofixture/kotest/KofixtureStringSpec : io/kotest/core/s
 	public fun beforeSpec (Lio/kotest/core/spec/Spec;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun buildRegistry ()V
 	public fun getFixtureModules ()Ljava/util/List;
-	public fun registry ()Lio/kofixture/core/FixtureRegistry;
+	public fun registry ()Lio/kofixture/Registry;
 }
 
-public abstract class io/kofixture/kotest/KofixtureWordSpec : io/kotest/core/spec/style/WordSpec, io/kofixture/core/KofixtureTest {
+public abstract class io/kofixture/KofixtureWordSpec : io/kotest/core/spec/style/WordSpec, io/kofixture/core/KofixtureTest {
 	public fun <init> ()V
 	public fun <init> (Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -109,6 +94,31 @@ public abstract class io/kofixture/kotest/KofixtureWordSpec : io/kotest/core/spe
 	public fun beforeSpec (Lio/kotest/core/spec/Spec;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun buildRegistry ()V
 	public fun getFixtureModules ()Ljava/util/List;
-	public fun registry ()Lio/kofixture/core/FixtureRegistry;
+	public fun registry ()Lio/kofixture/Registry;
+}
+
+public final class io/kofixture/core/KofixtureContext {
+	public static final field INSTANCE Lio/kofixture/core/KofixtureContext;
+	public final fun buildFor (Lio/kofixture/core/KofixtureTest;)V
+	public final fun getDefaultModules ()Ljava/util/List;
+	public final fun registryFor (Lio/kofixture/core/KofixtureTest;)Lio/kofixture/Registry;
+	public final fun releaseFor (Lio/kofixture/core/KofixtureTest;)V
+	public final fun setDefaultModules (Ljava/util/List;)V
+}
+
+public abstract interface class io/kofixture/core/KofixtureTest {
+	public fun buildRegistry ()V
+	public fun getFixtureModules ()Ljava/util/List;
+	public fun registry ()Lio/kofixture/Registry;
+}
+
+public final class io/kofixture/core/KofixtureTest$DefaultImpls {
+	public static fun buildRegistry (Lio/kofixture/core/KofixtureTest;)V
+	public static fun getFixtureModules (Lio/kofixture/core/KofixtureTest;)Ljava/util/List;
+	public static fun registry (Lio/kofixture/core/KofixtureTest;)Lio/kofixture/Registry;
+}
+
+public final class io/kofixture/core/KofixtureTestKt {
+	public static final fun kofixtureRegistry (Lio/kotest/core/test/TestScope;)Lio/kofixture/Registry;
 }
 
