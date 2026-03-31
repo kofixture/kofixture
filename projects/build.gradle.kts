@@ -3,7 +3,6 @@ import io.gitlab.arturbosch.detekt.Detekt
 plugins {
     // kotlin-multiplatform and kotlin-jvm are applied per-module via the kofixture-kmp convention
     // plugin (buildSrc). Declaring them here would conflict with the buildSrc classpath.
-    alias(libs.plugins.ksp).apply(false)
     alias(libs.plugins.spotless)
     alias(libs.plugins.detekt)
     // dokka is on the buildSrc classpath and applied per-project in the allprojects block below
@@ -63,9 +62,7 @@ allprojects {
 }
 
 // ── Binary Compatibility Validator ────────────────────────────────────────────
-apiValidation {
-    ignoredProjects.add("kofixture-ksp") // processor, not a stable library API
-}
+apiValidation {}
 
 // ── NMCP (Maven Central Publishing) ──────────────────────────────────────────
 // TODO: Before first release, add GitHub Secrets:

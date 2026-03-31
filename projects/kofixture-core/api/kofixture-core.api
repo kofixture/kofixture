@@ -1,172 +1,131 @@
-public final class io/kofixture/core/ActiveOverrides {
-	public static final field Companion Lio/kofixture/core/ActiveOverrides$Companion;
-	public synthetic fun <init> (Ljava/util/Map;Ljava/util/Map;Lio/kofixture/core/CollectionConfig;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun getCollectionConfig ()Lio/kofixture/core/CollectionConfig;
-	public final fun resolveNamed (Lio/kofixture/core/NamedOverrideKey;)Lio/kofixture/core/Generator;
-	public final fun resolveType (Lkotlin/reflect/KType;)Lio/kofixture/core/Generator;
-}
-
-public final class io/kofixture/core/ActiveOverrides$Companion {
-	public final fun from (Lio/kofixture/core/OverrideScope;)Lio/kofixture/core/ActiveOverrides;
-	public final fun getEMPTY ()Lio/kofixture/core/ActiveOverrides;
-}
-
-public final class io/kofixture/core/CollectionConfig {
+public final class io/kofixture/CollectionSizeConfig {
 	public fun <init> ()V
 	public fun <init> (Lkotlin/ranges/IntRange;Lkotlin/ranges/IntRange;Lkotlin/ranges/IntRange;)V
 	public synthetic fun <init> (Lkotlin/ranges/IntRange;Lkotlin/ranges/IntRange;Lkotlin/ranges/IntRange;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lkotlin/ranges/IntRange;
 	public final fun component2 ()Lkotlin/ranges/IntRange;
 	public final fun component3 ()Lkotlin/ranges/IntRange;
-	public final fun copy (Lkotlin/ranges/IntRange;Lkotlin/ranges/IntRange;Lkotlin/ranges/IntRange;)Lio/kofixture/core/CollectionConfig;
-	public static synthetic fun copy$default (Lio/kofixture/core/CollectionConfig;Lkotlin/ranges/IntRange;Lkotlin/ranges/IntRange;Lkotlin/ranges/IntRange;ILjava/lang/Object;)Lio/kofixture/core/CollectionConfig;
+	public final fun copy (Lkotlin/ranges/IntRange;Lkotlin/ranges/IntRange;Lkotlin/ranges/IntRange;)Lio/kofixture/CollectionSizeConfig;
+	public static synthetic fun copy$default (Lio/kofixture/CollectionSizeConfig;Lkotlin/ranges/IntRange;Lkotlin/ranges/IntRange;Lkotlin/ranges/IntRange;ILjava/lang/Object;)Lio/kofixture/CollectionSizeConfig;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getListSize ()Lkotlin/ranges/IntRange;
-	public final fun getMapSize ()Lkotlin/ranges/IntRange;
-	public final fun getSetSize ()Lkotlin/ranges/IntRange;
+	public final fun getList ()Lkotlin/ranges/IntRange;
+	public final fun getMap ()Lkotlin/ranges/IntRange;
+	public final fun getSet ()Lkotlin/ranges/IntRange;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/kofixture/core/CollectionConfigBuilder {
+public final class io/kofixture/CollectionSizeScope {
 	public fun <init> ()V
-	public final fun getListSize ()Lkotlin/ranges/IntRange;
-	public final fun getMapSize ()Lkotlin/ranges/IntRange;
-	public final fun getSetSize ()Lkotlin/ranges/IntRange;
-	public final fun setListSize (Lkotlin/ranges/IntRange;)V
-	public final fun setMapSize (Lkotlin/ranges/IntRange;)V
-	public final fun setSetSize (Lkotlin/ranges/IntRange;)V
+	public final fun getList ()Lkotlin/ranges/IntRange;
+	public final fun getMap ()Lkotlin/ranges/IntRange;
+	public final fun getSet ()Lkotlin/ranges/IntRange;
+	public final fun setList (Lkotlin/ranges/IntRange;)V
+	public final fun setMap (Lkotlin/ranges/IntRange;)V
+	public final fun setSet (Lkotlin/ranges/IntRange;)V
 }
 
-public final class io/kofixture/core/FactoryScope {
-	public fun <init> (Lio/kofixture/core/FixtureRegistry;Lio/kofixture/core/ActiveOverrides;)V
-	public final fun getActiveOverrides ()Lio/kofixture/core/ActiveOverrides;
-	public final fun getRegistry ()Lio/kofixture/core/FixtureRegistry;
+public final class io/kofixture/FixtureModule {
+	public final fun applyTo (Lio/kofixture/RegistryBuilder;)V
 }
 
-public final class io/kofixture/core/FixtureModule {
-}
-
-public final class io/kofixture/core/FixtureModuleKt {
-	public static final fun fixtureModule (Lkotlin/jvm/functions/Function1;)Lio/kofixture/core/FixtureModule;
-}
-
-public abstract interface class io/kofixture/core/FixtureOverride {
-}
-
-public final class io/kofixture/core/FixtureOverride$Named : io/kofixture/core/FixtureOverride {
-	public fun <init> (Lio/kofixture/core/NamedOverrideKey;Lio/kofixture/core/Generator;)V
-	public final fun getGen ()Lio/kofixture/core/Generator;
-	public final fun getKey ()Lio/kofixture/core/NamedOverrideKey;
-}
-
-public final class io/kofixture/core/FixtureOverride$TypeBased : io/kofixture/core/FixtureOverride {
-	public fun <init> (Lkotlin/reflect/KType;Lio/kofixture/core/Generator;)V
-	public final fun getGen ()Lio/kofixture/core/Generator;
-	public final fun getType ()Lkotlin/reflect/KType;
-}
-
-public final class io/kofixture/core/FixtureRegistry {
-	public final fun getCollectionConfig ()Lio/kofixture/core/CollectionConfig;
-	public final fun resolve (Lkotlin/reflect/KType;Ljava/lang/String;Lio/kofixture/core/ActiveOverrides;)Lio/kofixture/core/Generator;
-	public static synthetic fun resolve$default (Lio/kofixture/core/FixtureRegistry;Lkotlin/reflect/KType;Ljava/lang/String;Lio/kofixture/core/ActiveOverrides;ILjava/lang/Object;)Lio/kofixture/core/Generator;
-}
-
-public final class io/kofixture/core/FixtureRegistryBuilder {
+public final class io/kofixture/FixtureModuleBuilder {
 	public fun <init> ()V
-	public final fun build ()Lio/kofixture/core/FixtureRegistry;
-	public final fun collections (Lkotlin/jvm/functions/Function1;)V
-	public final fun getCollectionConfig ()Lio/kofixture/core/CollectionConfig;
-	public final fun getFactories ()Ljava/util/Map;
-	public final fun includes ([Lio/kofixture/core/FixtureModule;)V
-	public final fun register (Lkotlin/reflect/KType;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
-	public static synthetic fun register$default (Lio/kofixture/core/FixtureRegistryBuilder;Lkotlin/reflect/KType;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
-	public final fun setCollectionConfig (Lio/kofixture/core/CollectionConfig;)V
+	public final fun build ()Lio/kofixture/FixtureModule;
+	public final fun getRegistrations ()Ljava/util/List;
 }
 
-public abstract interface class io/kofixture/core/Generator {
-	public abstract fun next (Lkotlin/random/Random;)Ljava/lang/Object;
+public final class io/kofixture/FixtureModuleKt {
+	public static final fun fixtureModule (Lkotlin/jvm/functions/Function1;)Lio/kofixture/FixtureModule;
 }
 
-public abstract interface annotation class io/kofixture/core/Kofixture : java/lang/annotation/Annotation {
-	public abstract fun classes ()[Ljava/lang/Class;
-	public abstract fun excludedClasses ()[Ljava/lang/Class;
-	public abstract fun moduleName ()Ljava/lang/String;
-	public abstract fun packages ()[Ljava/lang/String;
-}
-
-public final class io/kofixture/core/KofixtureContext {
-	public static final field INSTANCE Lio/kofixture/core/KofixtureContext;
-	public final fun getDefaultModules ()Ljava/util/List;
-	public final fun getRegistries ()Ljava/util/Map;
-	public final fun registryFor (Lio/kofixture/core/KofixtureTest;)Lio/kofixture/core/FixtureRegistry;
-	public final fun releaseFor (Lio/kofixture/core/KofixtureTest;)V
-	public final fun setDefaultModules (Ljava/util/List;)V
-}
-
-public abstract interface class io/kofixture/core/KofixtureTest {
-	public fun buildRegistry ()V
-	public fun getFixtureModules ()Ljava/util/List;
-	public fun registry ()Lio/kofixture/core/FixtureRegistry;
-}
-
-public final class io/kofixture/core/KofixtureTest$DefaultImpls {
-	public static fun buildRegistry (Lio/kofixture/core/KofixtureTest;)V
-	public static fun getFixtureModules (Lio/kofixture/core/KofixtureTest;)Ljava/util/List;
-	public static fun registry (Lio/kofixture/core/KofixtureTest;)Lio/kofixture/core/FixtureRegistry;
-}
-
-public final class io/kofixture/core/NamedOverrideKey {
-	public fun <init> (Lkotlin/reflect/KType;Ljava/lang/String;)V
-	public final fun component1 ()Lkotlin/reflect/KType;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (Lkotlin/reflect/KType;Ljava/lang/String;)Lio/kofixture/core/NamedOverrideKey;
-	public static synthetic fun copy$default (Lio/kofixture/core/NamedOverrideKey;Lkotlin/reflect/KType;Ljava/lang/String;ILjava/lang/Object;)Lio/kofixture/core/NamedOverrideKey;
+public final class io/kofixture/GenerationContext {
+	public static final field Companion Lio/kofixture/GenerationContext$Companion;
+	public fun <init> (Ljava/util/Map;Ljava/util/Map;)V
+	public final fun component1 ()Ljava/util/Map;
+	public final fun component2 ()Ljava/util/Map;
+	public final fun copy (Ljava/util/Map;Ljava/util/Map;)Lio/kofixture/GenerationContext;
+	public static synthetic fun copy$default (Lio/kofixture/GenerationContext;Ljava/util/Map;Ljava/util/Map;ILjava/lang/Object;)Lio/kofixture/GenerationContext;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getOwnerType ()Lkotlin/reflect/KType;
-	public final fun getParamName ()Ljava/lang/String;
+	public final fun getPropertyOverrides ()Ljava/util/Map;
+	public final fun getTypeOverrides ()Ljava/util/Map;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/kofixture/core/OverrideScope {
-	public fun <init> (Lio/kofixture/core/FixtureRegistry;)V
-	public final fun addOverride (Lio/kofixture/core/FixtureOverride;)V
+public final class io/kofixture/GenerationContext$Companion {
+	public final fun getEMPTY ()Lio/kofixture/GenerationContext;
+}
+
+public final class io/kofixture/Generator {
+	public static final field Companion Lio/kofixture/Generator$Companion;
+	public fun <init> (Lkotlin/jvm/functions/Function0;)V
+	public synthetic fun <init> (Lkotlin/jvm/functions/Function1;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun next ()Ljava/lang/Object;
+	public final fun next (Lio/kofixture/GenerationContext;)Ljava/lang/Object;
+}
+
+public final class io/kofixture/Generator$Companion {
+	public final fun contextual (Lkotlin/jvm/functions/Function1;)Lio/kofixture/Generator;
+}
+
+public final class io/kofixture/GeneratorKt {
+	public static final fun filter (Lio/kofixture/Generator;ILkotlin/jvm/functions/Function1;)Lio/kofixture/Generator;
+	public static synthetic fun filter$default (Lio/kofixture/Generator;ILkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/kofixture/Generator;
+	public static final fun flatMap (Lio/kofixture/Generator;Lkotlin/jvm/functions/Function1;)Lio/kofixture/Generator;
+	public static final fun map (Lio/kofixture/Generator;Lkotlin/jvm/functions/Function1;)Lio/kofixture/Generator;
+	public static final fun toArb (Lio/kofixture/Generator;)Lio/kotest/property/Arb;
+	public static final fun toGenerator (Lio/kotest/property/Arb;)Lio/kofixture/Generator;
+}
+
+public final class io/kofixture/OverrideScope {
+	public fun <init> ()V
 	public final fun collections (Lkotlin/jvm/functions/Function1;)V
-	public final fun getFixtureOverrides ()Ljava/util/List;
-	public final fun getOverriddenCollectionConfig ()Lio/kofixture/core/CollectionConfig;
-	public final fun getOverrides ()Ljava/util/List;
-	public final fun getRegistry ()Lio/kofixture/core/FixtureRegistry;
+	public final fun getCollectionSizes ()Lio/kofixture/CollectionSizeConfig;
+	public final fun getPropertyOverrides ()Ljava/util/Map;
+	public final fun getTypeOverrides ()Ljava/util/Map;
+	public final fun override (Lkotlin/reflect/KProperty1;)Lio/kofixture/PropertyBound;
+	public final fun setCollectionSizes (Lio/kofixture/CollectionSizeConfig;)V
 }
 
-public final class io/kofixture/core/PropOverrideScope {
-	public fun <init> (Lio/kofixture/core/FixtureRegistry;)V
-	public final fun gen (Lkotlin/jvm/functions/Function0;)Lio/kofixture/core/Generator;
-	public final fun getRegistry ()Lio/kofixture/core/FixtureRegistry;
+public final class io/kofixture/PropertyBound {
+	public final fun with (Lio/kofixture/Generator;)V
+	public final fun with (Lkotlin/jvm/functions/Function0;)V
 }
 
-public final class io/kofixture/core/RegistryKey {
-	public fun <init> (Lkotlin/reflect/KType;Ljava/lang/String;)V
-	public synthetic fun <init> (Lkotlin/reflect/KType;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Lkotlin/reflect/KType;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (Lkotlin/reflect/KType;Ljava/lang/String;)Lio/kofixture/core/RegistryKey;
-	public static synthetic fun copy$default (Lio/kofixture/core/RegistryKey;Lkotlin/reflect/KType;Ljava/lang/String;ILjava/lang/Object;)Lio/kofixture/core/RegistryKey;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getTag ()Ljava/lang/String;
-	public final fun getType ()Lkotlin/reflect/KType;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
+public final class io/kofixture/RegistrationScope {
+	public static final field Companion Lio/kofixture/RegistrationScope$Companion;
+	public fun <init> (Lkotlin/Lazy;)V
+	public fun <init> (Lkotlin/Lazy;Lio/kofixture/GenerationContext;)V
+	public synthetic fun <init> (Lkotlin/Lazy;Lio/kofixture/GenerationContext;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getContext ()Lio/kofixture/GenerationContext;
+	public final fun getRegistryRef ()Lkotlin/Lazy;
 }
 
-public final class io/kofixture/core/RegistryKt {
-	public static final fun buildRegistry (Lkotlin/jvm/functions/Function1;)Lio/kofixture/core/FixtureRegistry;
-	public static final fun generatorFor (Lio/kofixture/core/FixtureRegistry;Lkotlin/reflect/KType;Ljava/lang/String;Lio/kofixture/core/ActiveOverrides;)Lio/kofixture/core/Generator;
+public final class io/kofixture/RegistrationScope$Companion {
+	public final fun bound (Lkotlin/Lazy;Lio/kofixture/GenerationContext;)Lio/kofixture/RegistrationScope;
 }
 
-public final class io/kofixture/core/TypeOverrideScope {
-	public fun <init> (Lio/kofixture/core/FixtureRegistry;)V
-	public final fun gen (Lkotlin/jvm/functions/Function0;)Lio/kofixture/core/Generator;
-	public final fun getRegistry ()Lio/kofixture/core/FixtureRegistry;
+public final class io/kofixture/Registry {
+	public static final field Companion Lio/kofixture/Registry$Companion;
+	public final fun applyPropertyOverrides (Ljava/lang/Object;Lio/kofixture/GenerationContext;)Ljava/lang/Object;
+	public final fun resolveAndGenerate (Lkotlin/reflect/KType;)Ljava/lang/Object;
+	public final fun resolveAndGenerate (Lkotlin/reflect/KType;Lio/kofixture/GenerationContext;)Ljava/lang/Object;
+	public final fun resolveAndGenerate (Lkotlin/reflect/KType;Lio/kofixture/GenerationContext;Lio/kofixture/CollectionSizeConfig;)Ljava/lang/Object;
+}
+
+public final class io/kofixture/Registry$Companion {
+}
+
+public final class io/kofixture/RegistryBuilder {
+	public fun <init> ()V
+	public final fun getGenerators ()Ljava/util/Map;
+	public final fun getRegistryRef ()Lkotlin/Lazy;
+	public final fun include (Lio/kofixture/FixtureModule;)V
+	public final fun registerByType (Lkotlin/reflect/KType;Lio/kofixture/Generator;)V
+}
+
+public final class io/kofixture/RegistryKt {
+	public static final fun buildRegistry (Lkotlin/jvm/functions/Function1;)Lio/kofixture/Registry;
 }
 
