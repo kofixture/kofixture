@@ -28,7 +28,7 @@ jobs:
 
       - name: Build (JVM only — CodeQL analyses JVM bytecode)
         working-directory: projects
-        run: ./gradlew compileKotlinJvm
+        run: ./gradlew :kofixture-core:compileKotlin :kofixture-kotest:compileKotlin
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
