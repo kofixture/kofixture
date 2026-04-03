@@ -142,8 +142,9 @@ class Registry internal constructor(
         if (klass.isSealed) {
             val subclasses = collectConcreteSubclasses(klass)
             require(subclasses.isNotEmpty()) { "No eligible subclass for sealed ${klass.simpleName}" }
-            return generateViaReflection(subclasses.random(), context, depth, sizes)
+            return resolveAndGenerate<Any>(subclasses.random().createType(), context, depth + 1, sizes)
         }
+        klass.objectInstance?.let { return it }
         val constructor =
             klass.primaryConstructor
                 ?: error("No primary constructor for ${klass.simpleName}. Register a Generator<${klass.simpleName}> directly.")
@@ -238,6 +239,11 @@ class PropertyBound<S : Any, T> internal constructor(
     private val prop: KProperty1<S, T>,
     private val scope: OverrideScope,
 ) {
+    /** Registers a constant [value] for this property. */
+    infix fun with(value: T) {
+        scope.propertyOverrides[prop] = Generator { value }
+    }
+
     /**
      * Registers [factory] as the value supplier for this property.
      * Called on every [Registry.next] invocation, so randomised factories work as expected:
