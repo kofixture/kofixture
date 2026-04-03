@@ -1,9 +1,5 @@
 package io.kofixture
 
-import io.kotest.property.Arb
-import io.kotest.property.RandomSource
-import io.kotest.property.arbitrary.arbitrary
-
 /**
  * A functional interface that produces values of type [T] on demand.
  *
@@ -52,11 +48,3 @@ fun <T> Generator<T>.filter(
 fun <T, R> Generator<T>.flatMap(transform: (T) -> Generator<R>): Generator<R> = Generator.contextual { context ->
     transform(next(context)).next(context)
 }
-
-fun <T> Generator<T>.toArb(): Arb<T> = arbitrary { next() }
-
-/**
- * Wraps this [Arb] as a [Generator]. A fresh [RandomSource] is created on every
- * [Generator.next] call, making each invocation independent and thread-safe.
- */
-fun <T> Arb<T>.toGenerator(): Generator<T> = Generator { sample(RandomSource.default()).value }

@@ -18,7 +18,6 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile>().configureEa
 
 dependencies {
     api(libs.kotlin.reflect)
-    api(libs.kotest.property)
 
     testImplementation(libs.kotest.framework.engine)
     testImplementation(libs.kotest.assertions.core)

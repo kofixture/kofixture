@@ -3,6 +3,7 @@ package io.kofixture.core
 import io.kofixture.FixtureModule
 import io.kofixture.Registry
 import io.kofixture.buildRegistry
+import io.kofixture.kotestPrimitivesModule
 
 /**
  * Global context managing per-spec [Registry] instances.
@@ -27,7 +28,11 @@ object KofixtureContext {
                 "Either set KofixtureContext.defaultModules in ProjectConfig, " +
                 "or override fixtureModules in the spec."
         }
-        registries[spec] = buildRegistry { modules.forEach { include(it) } }
+        registries[spec] =
+            buildRegistry {
+                include(kotestPrimitivesModule)
+                modules.forEach { include(it) }
+            }
     }
 
     fun releaseFor(spec: KofixtureTest) {

@@ -1,47 +1,46 @@
 package io.kofixture
 
-import io.kotest.property.Arb
-import io.kotest.property.arbitrary.boolean
-import io.kotest.property.arbitrary.byte
-import io.kotest.property.arbitrary.char
-import io.kotest.property.arbitrary.double
-import io.kotest.property.arbitrary.float
-import io.kotest.property.arbitrary.int
-import io.kotest.property.arbitrary.kotlinInstant
-import io.kotest.property.arbitrary.locale
-import io.kotest.property.arbitrary.long
-import io.kotest.property.arbitrary.map
-import io.kotest.property.arbitrary.short
-import io.kotest.property.arbitrary.string
-import io.kotest.property.arbitrary.uuid
-import io.kotest.property.arbitrary.zoneId
 import java.time.ZoneId
 import java.util.Locale
 import java.util.UUID
+import kotlin.random.Random
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 import kotlin.time.Instant
 
+private val defaultLocalePool = Locale.getAvailableLocales().filter { it.language.isNotBlank() }
+private val defaultZoneIdPool = ZoneId.getAvailableZoneIds().sorted()
+private const val STRING_ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+private const val MIN_FLOATING_POINT_VALUE = -1_000_000.0
+private const val MAX_FLOATING_POINT_VALUE = 1_000_000.0
+private val minInstantMillis = Instant.parse("1990-01-01T00:00:00Z").toEpochMilliseconds()
+private val maxInstantMillis = Instant.parse("2100-01-01T00:00:00Z").toEpochMilliseconds()
+
+private fun randomString(
+    minLength: Int = 1,
+    maxLength: Int = 24,
+): String {
+    val length = Random.nextInt(minLength, maxLength + 1)
+    return buildString(length) {
+        repeat(length) {
+            append(STRING_ALPHABET.random())
+        }
+    }
+}
+
 internal val defaultGenerators: Map<KType, Generator<*>> =
     buildMap {
-        put(typeOf<Int>(), Arb.int().toGenerator())
-        put(typeOf<Long>(), Arb.long().toGenerator())
-        put(typeOf<Double>(), Arb.double().toGenerator())
-        put(typeOf<Float>(), Arb.float().toGenerator())
-        put(typeOf<Boolean>(), Arb.boolean().toGenerator())
-        put(typeOf<String>(), Arb.string().toGenerator())
-        put(typeOf<UUID>(), Arb.uuid().toGenerator())
-        put(typeOf<Short>(), Arb.short().toGenerator())
-        put(typeOf<Byte>(), Arb.byte().toGenerator())
-        put(typeOf<Char>(), Arb.char().toGenerator())
-        put(typeOf<ZoneId>(), Arb.zoneId().toGenerator())
-        put(typeOf<Locale>(), Arb.locale().map { Locale.of(it) }.toGenerator())
-        put(
-            typeOf<Instant>(),
-            Arb
-                .kotlinInstant(
-                    minValue = Instant.parse("1990-01-01T00:00:00Z"),
-                    maxValue = Instant.parse("2100-01-01T00:00:00Z"),
-                ).toGenerator(),
-        )
+        put(typeOf<Int>(), Generator { Random.nextInt() })
+        put(typeOf<Long>(), Generator { Random.nextLong() })
+        put(typeOf<Double>(), Generator { Random.nextDouble(MIN_FLOATING_POINT_VALUE, MAX_FLOATING_POINT_VALUE) })
+        put(typeOf<Float>(), Generator { Random.nextDouble(MIN_FLOATING_POINT_VALUE, MAX_FLOATING_POINT_VALUE).toFloat() })
+        put(typeOf<Boolean>(), Generator { Random.nextBoolean() })
+        put(typeOf<String>(), Generator { randomString() })
+        put(typeOf<UUID>(), Generator { UUID.randomUUID() })
+        put(typeOf<Short>(), Generator { Random.nextInt(Short.MIN_VALUE.toInt(), Short.MAX_VALUE.toInt() + 1).toShort() })
+        put(typeOf<Byte>(), Generator { Random.nextInt(Byte.MIN_VALUE.toInt(), Byte.MAX_VALUE.toInt() + 1).toByte() })
+        put(typeOf<Char>(), Generator { STRING_ALPHABET.random() })
+        put(typeOf<ZoneId>(), Generator { ZoneId.of(defaultZoneIdPool.random()) })
+        put(typeOf<Locale>(), Generator { defaultLocalePool.random() })
+        put(typeOf<Instant>(), Generator { Instant.fromEpochMilliseconds(Random.nextLong(minInstantMillis, maxInstantMillis + 1)) })
     }

@@ -31,6 +31,7 @@ public final class io/kofixture/FixtureModule {
 
 public final class io/kofixture/FixtureModuleBuilder {
 	public fun <init> ()V
+	public final fun addRegistration (Lkotlin/jvm/functions/Function1;)V
 	public final fun build ()Lio/kofixture/FixtureModule;
 	public final fun getRegistrations ()Ljava/util/List;
 }
@@ -74,8 +75,6 @@ public final class io/kofixture/GeneratorKt {
 	public static synthetic fun filter$default (Lio/kofixture/Generator;ILkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/kofixture/Generator;
 	public static final fun flatMap (Lio/kofixture/Generator;Lkotlin/jvm/functions/Function1;)Lio/kofixture/Generator;
 	public static final fun map (Lio/kofixture/Generator;Lkotlin/jvm/functions/Function1;)Lio/kofixture/Generator;
-	public static final fun toArb (Lio/kofixture/Generator;)Lio/kotest/property/Arb;
-	public static final fun toGenerator (Lio/kotest/property/Arb;)Lio/kofixture/Generator;
 }
 
 public final class io/kofixture/OverrideScope {
@@ -90,6 +89,7 @@ public final class io/kofixture/OverrideScope {
 
 public final class io/kofixture/PropertyBound {
 	public final fun with (Lio/kofixture/Generator;)V
+	public final fun with (Ljava/lang/Object;)V
 	public final fun with (Lkotlin/jvm/functions/Function0;)V
 }
 
@@ -123,6 +123,7 @@ public final class io/kofixture/RegistryBuilder {
 	public final fun getRegistryRef ()Lkotlin/Lazy;
 	public final fun include (Lio/kofixture/FixtureModule;)V
 	public final fun registerByType (Lkotlin/reflect/KType;Lio/kofixture/Generator;)V
+	public final fun registerFactory (Lkotlin/reflect/KType;Lkotlin/jvm/functions/Function1;)V
 }
 
 public final class io/kofixture/RegistryKt {

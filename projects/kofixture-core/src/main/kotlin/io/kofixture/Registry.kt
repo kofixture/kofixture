@@ -1,7 +1,5 @@
 package io.kofixture
 
-import io.kotest.property.Arb
-import kotlin.jvm.JvmName
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KType
@@ -129,8 +127,37 @@ class Registry internal constructor(
         return generateViaReflection(klass, context, depth, sizes) as T
     }
 
-    private fun collectConcreteSubclasses(klass: KClass<*>): List<KClass<*>> = klass.sealedSubclasses.flatMap { sub ->
-        if (sub.isSealed) collectConcreteSubclasses(sub) else listOf(sub)
+    private fun singletonInstanceOrNull(klass: KClass<*>): Any? = klass.objectInstance
+
+    private fun generateSealedSubclass(
+        klass: KClass<*>,
+        context: GenerationContext,
+        depth: Int,
+        sizes: CollectionSizeConfig,
+    ): Any {
+        val concreteClass = chooseConcreteSubclass(klass)
+        return resolveAndGenerate<Any>(concreteClass.createType(), context, depth + 1, sizes)
+    }
+
+    private fun generateNonSealedClass(
+        klass: KClass<*>,
+        context: GenerationContext,
+        depth: Int,
+        sizes: CollectionSizeConfig,
+    ): Any {
+        val singletonInstance = singletonInstanceOrNull(klass)
+        if (singletonInstance != null) {
+            return singletonInstance
+        }
+        val constructor =
+            klass.primaryConstructor
+                ?: error(
+                    "No primary constructor for ${klass.simpleName}. " +
+                        "Register a Generator<${klass.simpleName}> directly.",
+                )
+        constructor.isAccessible = true
+        val args = constructor.parameters.associateWith { resolveAndGenerate<Any?>(it.type, context, depth + 1, sizes) }
+        return constructor.callBy(args)
     }
 
     private fun generateViaReflection(
@@ -138,18 +165,10 @@ class Registry internal constructor(
         context: GenerationContext,
         depth: Int,
         sizes: CollectionSizeConfig,
-    ): Any {
-        if (klass.isSealed) {
-            val subclasses = collectConcreteSubclasses(klass)
-            require(subclasses.isNotEmpty()) { "No eligible subclass for sealed ${klass.simpleName}" }
-            return generateViaReflection(subclasses.random(), context, depth, sizes)
-        }
-        val constructor =
-            klass.primaryConstructor
-                ?: error("No primary constructor for ${klass.simpleName}. Register a Generator<${klass.simpleName}> directly.")
-        constructor.isAccessible = true
-        val args = constructor.parameters.associateWith { resolveAndGenerate<Any?>(it.type, context, depth + 1, sizes) }
-        return constructor.callBy(args)
+    ): Any = if (klass.isSealed) {
+        generateSealedSubclass(klass, context, depth, sizes)
+    } else {
+        generateNonSealedClass(klass, context, depth, sizes)
     }
 
     // @PublishedApi required: called from public inline fun next()
@@ -238,6 +257,11 @@ class PropertyBound<S : Any, T> internal constructor(
     private val prop: KProperty1<S, T>,
     private val scope: OverrideScope,
 ) {
+    /** Registers a constant [value] for this property. */
+    infix fun with(value: T) {
+        scope.propertyOverrides[prop] = Generator { value }
+    }
+
     /**
      * Registers [factory] as the value supplier for this property.
      * Called on every [Registry.next] invocation, so randomised factories work as expected:
@@ -261,22 +285,13 @@ class RegistryBuilder {
 
     @PublishedApi internal val registryRef: Lazy<Registry> = lazy { Registry(generators.toMap()) }
 
-    inline fun <reified T> register(generator: Generator<T>) {
-        generators[typeOf<T>()] = generator
-    }
-
-    inline fun <reified T> register(noinline factory: RegistrationScope.() -> Generator<T>) {
-        generators[typeOf<T>()] =
+    fun registerFactory(
+        type: KType,
+        factory: RegistrationScope.() -> Generator<*>,
+    ) {
+        generators[type] =
             Generator.contextual { context ->
                 factory(RegistrationScope.bound(registryRef, context)).next(context)
-            }
-    }
-
-    @JvmName("registerArbFactory")
-    inline fun <reified T> register(noinline factory: RegistrationScope.() -> Arb<T>) {
-        generators[typeOf<T>()] =
-            Generator.contextual { context ->
-                factory(RegistrationScope.bound(registryRef, context)).toGenerator().next(context)
             }
     }
 
@@ -313,5 +328,24 @@ fun buildRegistry(block: RegistryBuilder.() -> Unit): Registry {
 /** Returns a [Generator] that produces values of type [T] using this registry. */
 inline fun <reified T> Registry.generator(noinline block: OverrideScope.() -> Unit = {}): Generator<T> = Generator { next<T>(block) }
 
-/** Returns an [Arb] that produces values of type [T] using this registry. */
-inline fun <reified T> Registry.arb(noinline block: OverrideScope.() -> Unit = {}): Arb<T> = generator<T>(block).toArb()
+inline fun <reified T> RegistryBuilder.register(generator: Generator<T>) {
+    registerByType(typeOf<T>(), generator)
+}
+
+inline fun <reified T> RegistryBuilder.register(provider: T) {
+    register(Generator { provider })
+}
+
+inline fun <reified T> RegistryBuilder.register(noinline factory: RegistrationScope.() -> Generator<T>) {
+    registerFactory(typeOf<T>(), factory)
+}
+
+private fun collectConcreteSubclasses(klass: KClass<*>): List<KClass<*>> = klass.sealedSubclasses.flatMap { sub ->
+    if (sub.isSealed) collectConcreteSubclasses(sub) else listOf(sub)
+}
+
+private fun chooseConcreteSubclass(klass: KClass<*>): KClass<*> {
+    val subclasses = collectConcreteSubclasses(klass)
+    require(subclasses.isNotEmpty()) { "No eligible subclass for sealed ${klass.simpleName}" }
+    return subclasses.random()
+}

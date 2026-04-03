@@ -1,90 +1,132 @@
 # Kofixture
 
-Kofixture is a Kotlin Multiplatform library for generating type-safe test fixtures.
-It removes boilerplate from test setup with a composable, declarative API for producing
-arbitrarily complex object graphs — including nested types, enums, sealed hierarchies, and nullables.
+Kofixture is a Kotlin fixture library for tests. It gives you a small registry-based DSL for generating realistic objects, overriding only the fields that matter, and composing reusable fixture modules without reflection-heavy setup code in every test.
 
 ## Modules
 
-| Artifact | Targets | Description |
-|---|---|---|
-| `kofixture-core` | JVM, JS, Native | Core fixture generation engine |
-| `kofixture-kotest-arb` | JVM, JS, Native | Kotest `Arb<T>` integration |
-| `kofixture-kotest` | JVM, JS, Native | Kotest spec base classes and lifecycle listener |
-| `kofixture-ksp` | JVM | KSP processor — auto-generates fixture registrations |
-
-## Quickstart
-
-### With KSP + Kotest (recommended)
-
-**1. Annotate a companion object to generate a fixture module:**
-
-```kotlin
-// src/test/kotlin/com/example/Fixtures.kt
-@Kofixture(packages = ["com.example"])
-object Fixtures
-```
-
-KSP generates a `fixtures` property containing all generators for `User`, `Address`, etc.
-
-**2. Write tests using a spec base class:**
-
-```kotlin
-class UserTest : KofixtureFunSpec({
-    val user by sample<User> { name = "Alice" }
-    val profile by sample<Profile> {
-        user { name = "Bob" }
-        user { name { arbitrary { "Bob" } } }
-        address { city = "Warsaw" }
-    }
-
-    test("overrides name") { user.name shouldBe "Alice" }
-    test("overrides nested type") { profile.user.name shouldBe "Bob" }
-}) {
-    override val fixtureModules = listOf(fixtures)
-}
-```
-
-Nested overrides support const values plus Generator/Arb lambdas on child fields.
-Delegates (`sample<T>`, `generator<T>`, `arb<T>`) are resolved fresh per test via property delegation.
-
-### Without KSP (manual registry)
-
-```kotlin
-val registry = buildRegistry {
-    register<String> { Generator { random -> "str-${random.nextInt(100_000)}" } }
-    register<User> { User(next<String>(), next<Int>()) }
-}
-
-val user: User = registry.sample()
-val named: User = registry.sample { name = "Alice" }
-```
+| Artifact | Purpose |
+| --- | --- |
+| `io.github.kofixture:kofixture-core` | Core fixture engine, generators, registry DSL, primitive defaults |
+| `io.github.kofixture:kofixture-kotest` | Kotest spec helpers, `Arb` bridge, Kotest-backed primitive generators |
 
 ## Installation
 
 ```kotlin
-// build.gradle.kts
-testImplementation("io.github.kofixture:kofixture-core:0.1.2")
-
-// + Kotest integration (pick one or both)
-testImplementation("io.github.kofixture:kofixture-kotest-arb:0.1.2")
-testImplementation("io.github.kofixture:kofixture-kotest:0.1.2")
-
-// + KSP processor (auto-generates fixture modules from annotated objects)
-kspTest("io.github.kofixture:kofixture-ksp:0.1.2")
+dependencies {
+    testImplementation("io.github.kofixture:kofixture-core:0.2.2")
+}
 ```
 
+Add Kotest integration only if you want Kotest spec helpers or `Arb` support:
+
 ```kotlin
-// settings.gradle.kts
-pluginManagement {
-    plugins {
-        id("com.google.devtools.ksp") version "2.3.6"
+dependencies {
+    testImplementation("io.github.kofixture:kofixture-kotest:0.2.2")
+
+    testImplementation("io.kotest:kotest-runner-junit5:6.1.6")
+}
+```
+
+## Quickstart
+
+### Core
+
+Use `buildRegistry {}` when you want fixtures without pulling in Kotest:
+
+```kotlin
+import io.kofixture.Generator
+import io.kofixture.buildRegistry
+
+data class EmailAddress(val value: String)
+data class User(val email: EmailAddress, val age: Int)
+
+val registry =
+    buildRegistry {
+        register<EmailAddress>(Generator { EmailAddress("john@example.com") })
+    }
+
+val user = registry.next<User>()
+val adult = registry.next<User> {
+    override(User::age) with 42
+}
+```
+
+What you get out of the box:
+- Primitive generators for `String`, numbers, `Boolean`, `UUID`, `Locale`, `ZoneId`, and `Instant`
+- Reflection-based generation for data classes and constructor-backed types
+- Collection generation for `List`, `Set`, and `Map`
+- Scoped type overrides and property overrides
+- Reusable `fixtureModule {}` blocks
+
+### Kotest
+
+With `kofixture-kotest`, you can use the same registry API plus Kotest spec helpers and `Arb` integration:
+
+```kotlin
+import io.kofixture.Generator
+import io.kofixture.KofixtureStringSpec
+import io.kotest.property.Arb
+import io.kotest.matchers.shouldBe
+
+data class SignupRequest(val email: String, val password: String)
+
+private val authFixtures =
+    fixtureModule {
+        register<String> { Arb.string(minSize = 12, maxSize = 24) }
+        register<SignupRequest> {
+            Generator {
+                SignupRequest(
+                    email = "tester@example.com",
+                    password = "correct-horse-battery-staple",
+                )
+            }
+        }
+    }
+
+class SignupRequestTest : KofixtureStringSpec() {
+    override val fixtureModules = listOf(authFixtures)
+
+    init {
+        "supports property overrides" {
+            val request = next<SignupRequest> {
+                override(SignupRequest::email) with "invalid"
+            }
+
+            request.email shouldBe "invalid"
+        }
     }
 }
 ```
 
-Artifacts are published to Maven Central — no extra repository configuration needed.
+`kofixture-kotest` also adds:
+- `Registry.arb<T>()`
+- `Generator<T>.toArb()`
+- `Arb<T>.toGenerator()`
+- `register { Arb<T> }` in `buildRegistry {}` and `fixtureModule {}`
+- Kotest-backed primitive overrides for `Kofixture*Spec` users
 
-## Contributing
+## Examples
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). License: [Apache-2.0](LICENSE).
+The repository ships with runnable examples in [`examples/`](./examples):
+
+- `examples/core-only` shows manual registry usage with `kofixture-core`
+- `examples/kotest` shows `KofixtureStringSpec`, fixture modules, and `Arb` registration
+
+Both examples use a composite build, so they exercise the local sources directly instead of relying on a published version.
+
+## Documentation
+
+- [Core usage](./docs/core.md)
+- [Kotest integration](./docs/kotest.md)
+- [Fixture modules and overrides](./docs/modules-and-overrides.md)
+
+## Current Direction
+
+Kofixture v2 is intentionally smaller than the old KSP-based design:
+
+- no generated fixture registries
+- no annotation processor
+- one explicit registry model
+- optional Kotest integration layered on top of a clean core
+
+That keeps the library easier to understand, easier to debug, and easier to extend.

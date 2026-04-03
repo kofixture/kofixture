@@ -7,7 +7,35 @@ import kotlin.random.nextInt
 
 @JvmInline value class UserId(val raw: String)
 
+data object SingletonToken
+
+sealed interface Access
+
+data object NoAccess : Access
+
+data class GrantedAccess(val value: Int) : Access
+
 class RegistryTest : FreeSpec({
+
+    "next<T>() returns object instance for Kotlin object without explicit registration" {
+        val registry = buildRegistry {}
+
+        registry.next<SingletonToken>() shouldBe SingletonToken
+    }
+
+    "sealed generation uses registered generator for chosen subtype before reflection" {
+        val registry =
+            buildRegistry {
+                register<NoAccess>(Generator { NoAccess })
+                register<Int>(Generator { 7 })
+                register<GrantedAccess>(Generator { GrantedAccess(42) })
+            }
+
+        repeat(20) {
+            val generated = registry.next<Access>()
+            (generated == NoAccess || generated == GrantedAccess(42)) shouldBe true
+        }
+    }
 
     "next<T>() returns value from directly registered Generator" {
         val registry =
@@ -38,6 +66,21 @@ class RegistryTest : FreeSpec({
         val user =
             registry.next<User> {
                 override(User::name) with { "Alice" }
+            }
+        user.name shouldBe "Alice"
+        user.age shouldBe 25
+    }
+
+    "property override accepts direct values without wrapping them in a lambda" {
+        data class User(val name: String, val age: Int)
+        val registry =
+            buildRegistry {
+                register<String>(Generator { "random-name" })
+                register<Int>(Generator { 25 })
+            }
+        val user =
+            registry.next<User> {
+                override(User::name) with "Alice"
             }
         user.name shouldBe "Alice"
         user.age shouldBe 25
