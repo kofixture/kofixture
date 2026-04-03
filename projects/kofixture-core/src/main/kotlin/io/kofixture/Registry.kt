@@ -127,8 +127,37 @@ class Registry internal constructor(
         return generateViaReflection(klass, context, depth, sizes) as T
     }
 
-    private fun collectConcreteSubclasses(klass: KClass<*>): List<KClass<*>> = klass.sealedSubclasses.flatMap { sub ->
-        if (sub.isSealed) collectConcreteSubclasses(sub) else listOf(sub)
+    private fun singletonInstanceOrNull(klass: KClass<*>): Any? = klass.objectInstance
+
+    private fun generateSealedSubclass(
+        klass: KClass<*>,
+        context: GenerationContext,
+        depth: Int,
+        sizes: CollectionSizeConfig,
+    ): Any {
+        val concreteClass = chooseConcreteSubclass(klass)
+        return resolveAndGenerate<Any>(concreteClass.createType(), context, depth + 1, sizes)
+    }
+
+    private fun generateNonSealedClass(
+        klass: KClass<*>,
+        context: GenerationContext,
+        depth: Int,
+        sizes: CollectionSizeConfig,
+    ): Any {
+        val singletonInstance = singletonInstanceOrNull(klass)
+        if (singletonInstance != null) {
+            return singletonInstance
+        }
+        val constructor =
+            klass.primaryConstructor
+                ?: error(
+                    "No primary constructor for ${klass.simpleName}. " +
+                        "Register a Generator<${klass.simpleName}> directly.",
+                )
+        constructor.isAccessible = true
+        val args = constructor.parameters.associateWith { resolveAndGenerate<Any?>(it.type, context, depth + 1, sizes) }
+        return constructor.callBy(args)
     }
 
     private fun generateViaReflection(
@@ -136,19 +165,10 @@ class Registry internal constructor(
         context: GenerationContext,
         depth: Int,
         sizes: CollectionSizeConfig,
-    ): Any {
-        if (klass.isSealed) {
-            val subclasses = collectConcreteSubclasses(klass)
-            require(subclasses.isNotEmpty()) { "No eligible subclass for sealed ${klass.simpleName}" }
-            return resolveAndGenerate<Any>(subclasses.random().createType(), context, depth + 1, sizes)
-        }
-        klass.objectInstance?.let { return it }
-        val constructor =
-            klass.primaryConstructor
-                ?: error("No primary constructor for ${klass.simpleName}. Register a Generator<${klass.simpleName}> directly.")
-        constructor.isAccessible = true
-        val args = constructor.parameters.associateWith { resolveAndGenerate<Any?>(it.type, context, depth + 1, sizes) }
-        return constructor.callBy(args)
+    ): Any = if (klass.isSealed) {
+        generateSealedSubclass(klass, context, depth, sizes)
+    } else {
+        generateNonSealedClass(klass, context, depth, sizes)
     }
 
     // @PublishedApi required: called from public inline fun next()
@@ -318,4 +338,14 @@ inline fun <reified T> RegistryBuilder.register(provider: T) {
 
 inline fun <reified T> RegistryBuilder.register(noinline factory: RegistrationScope.() -> Generator<T>) {
     registerFactory(typeOf<T>(), factory)
+}
+
+private fun collectConcreteSubclasses(klass: KClass<*>): List<KClass<*>> = klass.sealedSubclasses.flatMap { sub ->
+    if (sub.isSealed) collectConcreteSubclasses(sub) else listOf(sub)
+}
+
+private fun chooseConcreteSubclass(klass: KClass<*>): KClass<*> {
+    val subclasses = collectConcreteSubclasses(klass)
+    require(subclasses.isNotEmpty()) { "No eligible subclass for sealed ${klass.simpleName}" }
+    return subclasses.random()
 }
