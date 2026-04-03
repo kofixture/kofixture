@@ -97,6 +97,15 @@ public abstract class io/kofixture/KofixtureWordSpec : io/kotest/core/spec/style
 	public fun registry ()Lio/kofixture/Registry;
 }
 
+public final class io/kofixture/KotestArbSupportKt {
+	public static final fun toArb (Lio/kofixture/Generator;)Lio/kotest/property/Arb;
+	public static final fun toGenerator (Lio/kotest/property/Arb;)Lio/kofixture/Generator;
+}
+
+public final class io/kofixture/KotestPrimitivesKt {
+	public static final fun getKotestPrimitivesModule ()Lio/kofixture/FixtureModule;
+}
+
 public final class io/kofixture/core/KofixtureContext {
 	public static final field INSTANCE Lio/kofixture/core/KofixtureContext;
 	public final fun buildFor (Lio/kofixture/core/KofixtureTest;)V

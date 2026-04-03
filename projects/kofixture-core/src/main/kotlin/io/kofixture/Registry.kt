@@ -1,7 +1,5 @@
 package io.kofixture
 
-import io.kotest.property.Arb
-import kotlin.jvm.JvmName
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KType
@@ -267,22 +265,13 @@ class RegistryBuilder {
 
     @PublishedApi internal val registryRef: Lazy<Registry> = lazy { Registry(generators.toMap()) }
 
-    inline fun <reified T> register(generator: Generator<T>) {
-        generators[typeOf<T>()] = generator
-    }
-
-    inline fun <reified T> register(noinline factory: RegistrationScope.() -> Generator<T>) {
-        generators[typeOf<T>()] =
+    fun registerFactory(
+        type: KType,
+        factory: RegistrationScope.() -> Generator<*>,
+    ) {
+        generators[type] =
             Generator.contextual { context ->
                 factory(RegistrationScope.bound(registryRef, context)).next(context)
-            }
-    }
-
-    @JvmName("registerArbFactory")
-    inline fun <reified T> register(noinline factory: RegistrationScope.() -> Arb<T>) {
-        generators[typeOf<T>()] =
-            Generator.contextual { context ->
-                factory(RegistrationScope.bound(registryRef, context)).toGenerator().next(context)
             }
     }
 
@@ -319,5 +308,14 @@ fun buildRegistry(block: RegistryBuilder.() -> Unit): Registry {
 /** Returns a [Generator] that produces values of type [T] using this registry. */
 inline fun <reified T> Registry.generator(noinline block: OverrideScope.() -> Unit = {}): Generator<T> = Generator { next<T>(block) }
 
-/** Returns an [Arb] that produces values of type [T] using this registry. */
-inline fun <reified T> Registry.arb(noinline block: OverrideScope.() -> Unit = {}): Arb<T> = generator<T>(block).toArb()
+inline fun <reified T> RegistryBuilder.register(generator: Generator<T>) {
+    registerByType(typeOf<T>(), generator)
+}
+
+inline fun <reified T> RegistryBuilder.register(provider: T) {
+    register(Generator { provider })
+}
+
+inline fun <reified T> RegistryBuilder.register(noinline factory: RegistrationScope.() -> Generator<T>) {
+    registerFactory(typeOf<T>(), factory)
+}

@@ -13,4 +13,9 @@ dependencyResolutionManagement {
     }
 }
 
-include(":app")
+includeBuild("../projects")
+
+include(
+    ":core-only",
+    ":kotest",
+)
