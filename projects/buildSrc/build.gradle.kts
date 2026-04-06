@@ -9,7 +9,7 @@ repositories {
 
 dependencies {
     // Keep in sync with kotlin version in gradle/libs.versions.toml
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.10")
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.20")
     implementation("org.jetbrains.dokka:dokka-gradle-plugin:2.1.0")
 }
 
