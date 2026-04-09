@@ -13,7 +13,7 @@ Kofixture is a Kotlin fixture library for tests. It gives you a small registry-b
 
 ```kotlin
 dependencies {
-    testImplementation("io.github.kofixture:kofixture-core:0.2.2")
+    testImplementation("io.github.kofixture:kofixture-core:0.2.3")
 }
 ```
 
@@ -21,7 +21,7 @@ Add Kotest integration only if you want Kotest spec helpers or `Arb` support:
 
 ```kotlin
 dependencies {
-    testImplementation("io.github.kofixture:kofixture-kotest:0.2.2")
+    testImplementation("io.github.kofixture:kofixture-kotest:0.2.3")
 
     testImplementation("io.kotest:kotest-runner-junit5:6.1.6")
 }
