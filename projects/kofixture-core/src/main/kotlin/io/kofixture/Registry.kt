@@ -165,7 +165,12 @@ class Registry internal constructor(
         context: GenerationContext,
         depth: Int,
         sizes: CollectionSizeConfig,
-    ): Any = if (klass.isSealed) {
+    ): Any = if (klass.java.isEnum) {
+        klass.java.enumConstants
+            ?.also { require(it.isNotEmpty()) { "No enum constants found for ${klass.simpleName}" } }
+            ?.random()
+            ?: error("No enum constants found for ${klass.simpleName}")
+    } else if (klass.isSealed) {
         generateSealedSubclass(klass, context, depth, sizes)
     } else {
         generateNonSealedClass(klass, context, depth, sizes)
