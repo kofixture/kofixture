@@ -15,27 +15,26 @@ object KofixtureContext {
 
     private val registries: MutableMap<KofixtureTest, Registry> = mutableMapOf()
 
-    fun registryFor(spec: KofixtureTest): Registry = registries[spec]
-        ?: error(
-            "No fixture registry found for ${spec::class.simpleName}. " +
-                "Make sure KofixtureExtension is registered in AbstractProjectConfig.",
-        )
+    fun registryFor(spec: KofixtureTest): Registry = registries.getOrPut(spec) { createRegistry(spec) }
 
     fun buildFor(spec: KofixtureTest) {
+        registries[spec] = createRegistry(spec)
+    }
+
+    fun releaseFor(spec: KofixtureTest) {
+        registries.remove(spec)
+    }
+
+    private fun createRegistry(spec: KofixtureTest): Registry {
         val modules = spec.fixtureModules.ifEmpty { defaultModules }
         require(modules.isNotEmpty()) {
             "No fixture modules configured for ${spec::class.simpleName}. " +
                 "Either set KofixtureContext.defaultModules in ProjectConfig, " +
                 "or override fixtureModules in the spec."
         }
-        registries[spec] =
-            buildRegistry {
-                include(kotestPrimitivesModule)
-                modules.forEach { include(it) }
-            }
-    }
-
-    fun releaseFor(spec: KofixtureTest) {
-        registries.remove(spec)
+        return buildRegistry {
+            include(kotestPrimitivesModule)
+            modules.forEach { include(it) }
+        }
     }
 }

@@ -9,6 +9,11 @@ import kotlin.random.nextInt
 
 data object SingletonToken
 
+enum class PlanTier {
+    FREE,
+    PRO,
+}
+
 sealed interface Access
 
 data object NoAccess : Access
@@ -21,6 +26,24 @@ class RegistryTest : FreeSpec({
         val registry = buildRegistry {}
 
         registry.next<SingletonToken>() shouldBe SingletonToken
+    }
+
+    "next<T>() auto-generates enum values without explicit registration" {
+        val registry = buildRegistry {}
+
+        repeat(20) {
+            PlanTier.entries.contains(registry.next<PlanTier>()) shouldBe true
+        }
+    }
+
+    "auto-generated reflected classes can include enum constructor parameters" {
+        data class Subscription(val tier: PlanTier)
+
+        val registry = buildRegistry {}
+
+        repeat(20) {
+            PlanTier.entries.contains(registry.next<Subscription>().tier) shouldBe true
+        }
     }
 
     "sealed generation uses registered generator for chosen subtype before reflection" {
