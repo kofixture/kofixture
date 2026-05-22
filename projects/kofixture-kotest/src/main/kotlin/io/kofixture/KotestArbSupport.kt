@@ -30,3 +30,6 @@ inline fun <reified T> RegistryBuilder.register(noinline factory: RegistrationSc
 inline fun <reified T> FixtureModuleBuilder.register(noinline factory: RegistrationScope.() -> Arb<T>) {
     addRegistration { register<T>(factory) }
 }
+
+/** Registers an Arb as the generator for this property. */
+infix fun <S : Any, T> PropertyBound<S, T>.with(arb: Arb<T>) = with(arb.toGenerator())
