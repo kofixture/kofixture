@@ -100,6 +100,7 @@ public abstract class io/kofixture/KofixtureWordSpec : io/kotest/core/spec/style
 public final class io/kofixture/KotestArbSupportKt {
 	public static final fun toArb (Lio/kofixture/Generator;)Lio/kotest/property/Arb;
 	public static final fun toGenerator (Lio/kotest/property/Arb;)Lio/kofixture/Generator;
+	public static final fun with (Lio/kofixture/PropertyBound;Lio/kotest/property/Arb;)V
 }
 
 public final class io/kofixture/KotestPrimitivesKt {
